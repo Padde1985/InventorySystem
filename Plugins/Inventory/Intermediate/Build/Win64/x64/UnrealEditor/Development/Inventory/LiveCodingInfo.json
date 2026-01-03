@@ -2,8 +2,19 @@
 	"RemapUnityFiles": 
 	{
 		"Module.Inventory.cpp.obj": [
+			"Inventory.init.gen.cpp.obj",
+			"Inv_HighlightableInterface.gen.cpp.obj",
+			"Inv_HighlightableStaticMeshComp.gen.cpp.obj",
+			"Inv_HUDWidget.gen.cpp.obj",
+			"Inv_ItemComponent.gen.cpp.obj",
+			"Inv_PlayerController.gen.cpp.obj",
 			"PerModuleInline.gen.cpp.obj",
-			"Inventory.cpp.obj"
+			"Inv_HighlightableInterface.cpp.obj",
+			"Inventory.cpp.obj",
+			"Inv_HighlightableStaticMeshComp.cpp.obj",
+			"Inv_ItemComponent.cpp.obj",
+			"Inv_PlayerController.cpp.obj",
+			"Inv_HUDWidget.cpp.obj"
 		]
 	}
 }

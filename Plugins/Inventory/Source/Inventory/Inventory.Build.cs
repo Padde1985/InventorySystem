@@ -10,8 +10,7 @@ public class Inventory : ModuleRules
 		
 		PublicIncludePaths.AddRange(
 			new string[] {
-				// ... add public include paths required here ...
-			}
+            }
 			);
 				
 		
@@ -38,6 +37,8 @@ public class Inventory : ModuleRules
 				"Engine",
 				"Slate",
 				"SlateCore",
+                "EnhancedInput",
+				"UMG",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);

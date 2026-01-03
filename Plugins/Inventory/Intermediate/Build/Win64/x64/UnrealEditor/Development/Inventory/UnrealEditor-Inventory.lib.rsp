@@ -6,7 +6,7 @@
 /NAME:"UnrealEditor-Inventory.dll"
 /IGNORE:4221
 /NODEFAULTLIB
-"D:/UnrealProjects/InventorySystem/Intermediate/Build/Win64/x64/InventorySystemEditor/Development/UnrealEd/SharedPCH.UnrealEd.Cpp20.h.obj"
+"D:/UnrealProjects/InventorySystem/Intermediate/Build/Win64/x64/InventorySystemEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
 "D:/UnrealProjects/InventorySystem/Plugins/Inventory/Intermediate/Build/Win64/x64/UnrealEditor/Development/Inventory/Module.Inventory.cpp.obj"
 "D:/UnrealProjects/InventorySystem/Plugins/Inventory/Intermediate/Build/Win64/x64/UnrealEditor/Development/Inventory/Default.rc2.res"
 /OUT:"D:/UnrealProjects/InventorySystem/Plugins/Inventory/Intermediate/Build/Win64/x64/UnrealEditor/Development/Inventory/UnrealEditor-Inventory.lib"

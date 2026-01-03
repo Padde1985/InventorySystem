@@ -7,21 +7,13 @@
 		{
 			"Name": "InventorySystem",
 			"Type": "Runtime",
-			"LoadingPhase": "Default",
-			"AdditionalDependencies": [
-				"Engine",
-				"AIModule",
-				"UMG"
-			]
+			"LoadingPhase": "Default"
 		}
 	],
 	"Plugins": [
 		{
 			"Name": "ModelingToolsEditorMode",
-			"Enabled": true,
-			"TargetAllowList": [
-				"Editor"
-			]
+			"Enabled": true
 		},
 		{
 			"Name": "StateTree",
@@ -35,6 +27,13 @@
 			"Name": "CrystalNodes",
 			"Enabled": true,
 			"MarketplaceURL": "com.epicgames.launcher://ue/marketplace/product/795d430fe08640bcb9f3f52c996a62a0"
+		},
+		{
+			"Name": "VisualStudioTools",
+			"Enabled": false,
+			"SupportedTargetPlatforms": [
+				"Win64"
+			]
 		}
 	],
 	"TargetPlatforms": [
