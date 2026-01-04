@@ -7,6 +7,7 @@
 class UInputMappingContext;
 class UInputAction;
 class UInv_HUDWidget;
+class UInv_InventoryComponent;
 
 UCLASS(PrioritizeCategories = ("Inventory"))
 class INVENTORY_API AInv_PlayerController : public APlayerController
@@ -18,6 +19,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	UFUNCTION(BlueprintCallable, Category = "Inventory") void ToggleInventory();
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
@@ -25,6 +28,7 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory") TArray<TObjectPtr<UInputMappingContext>> DefaultIMCs;
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory") TObjectPtr<UInputAction> PrimaryInteractAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Inventory") TObjectPtr<UInputAction> ToggleInventoryAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory") TSubclassOf<UInv_HUDWidget> HUDWidgetClass;
 	UPROPERTY()	TObjectPtr<UInv_HUDWidget> HUDWidget;
 	UPROPERTY(EditDefaultsOnly, Category = "Inventory") double TraceLength;
@@ -32,6 +36,7 @@ private:
 	
 	TWeakObjectPtr<AActor> ThisActor;
 	TWeakObjectPtr<AActor> LastActor;
+	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 
 	void PrimaryInteract();
 	void CreateHUDWidget();

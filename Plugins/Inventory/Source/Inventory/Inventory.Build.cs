@@ -25,6 +25,7 @@ public class Inventory : ModuleRules
 			new string[]
 			{
 				"Core",
+                "UMG",
 				// ... add other public dependencies that you statically link with here ...
 			}
 			);
@@ -38,7 +39,6 @@ public class Inventory : ModuleRules
 				"Slate",
 				"SlateCore",
                 "EnhancedInput",
-				"UMG",
 				// ... add private dependencies that you statically link with here ...	
 			}
 			);
