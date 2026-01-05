@@ -74,3 +74,7 @@ Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+#ignore the same folders in the plugin folder for this version
+Plugins/Inventory/Binaries/*
+Plugins/Inventory/Intermediate/*
