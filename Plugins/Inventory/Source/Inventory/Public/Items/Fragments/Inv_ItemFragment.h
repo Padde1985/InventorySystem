@@ -48,3 +48,15 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") TObjectPtr<UTexture2D> Icon{nullptr};
 	UPROPERTY(EditAnywhere, Category = "Inventory") FVector2D IconDimensions{44.f, 44.f};
 };
+
+USTRUCT(BlueprintType)
+struct FInv_StackableFragment : public FInv_ItemFragment
+{
+	GENERATED_BODY()
+	
+	int32 GetMaxStackSize() const;
+	int32 GetStackCount() const;
+private:
+	UPROPERTY(EditAnywhere, Category = "Inventory") int32 MaxStackSize = 1;
+	UPROPERTY(EditAnywhere, Category = "Inventory") int32 StackCount = 1;
+};

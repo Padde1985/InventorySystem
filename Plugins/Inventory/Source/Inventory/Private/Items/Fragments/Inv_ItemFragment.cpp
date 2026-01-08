@@ -34,3 +34,13 @@ UTexture2D* FInv_ImageFragment::GetIcon() const
 {
 	return this->Icon;
 }
+
+int32 FInv_StackableFragment::GetMaxStackSize() const
+{
+	return this->MaxStackSize;
+}
+
+int32 FInv_StackableFragment::GetStackCount() const
+{
+	return this->StackCount;
+}

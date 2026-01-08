@@ -1,5 +1,6 @@
 ﻿#include "Widgets/Inventory/SlottedItems/Inv_SlottedItem.h"
 #include "Components/Image.h"
+#include "Components/TextBlock.h"
 
 void UInv_SlottedItem::SetIsStackable(bool bStackable)
 {
@@ -49,4 +50,17 @@ void UInv_SlottedItem::SetInventoryItem(UInv_InventoryItem* Item)
 UInv_InventoryItem* UInv_SlottedItem::GetInventoryItem() const
 {
 	return this->InventoryItem.Get();
+}
+
+void UInv_SlottedItem::UpdateStackCount(int32 StackCount)
+{
+	if (StackCount > 0)
+	{
+		this->Text_StackCount->SetVisibility(ESlateVisibility::Visible);
+		this->Text_StackCount->SetText(FText::AsNumber(StackCount));
+	}
+	else
+	{
+		this->Text_StackCount->SetVisibility(ESlateVisibility::Collapsed);
+	}
 }

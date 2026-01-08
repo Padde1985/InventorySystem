@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Inv_GridSlot.generated.h"
 
+class UInv_InventoryItem;
 class UImage;
 
 UENUM(BlueprintType)
@@ -27,6 +28,14 @@ public:
 	void SetOccupiedTexture();
 	void SetSelectedTexture();
 	void SetGrayedOutTexture();
+	TWeakObjectPtr<UInv_InventoryItem> GetInventoryItem() const;
+	void SetInventoryItem(UInv_InventoryItem* Item);
+	int32 GetStackCount() const;
+	void SetStackCount(int32 InStackCount);
+	int32 GetUpperLeftIndex() const;
+	void SetUpperLeftIndex(int32 InUpperLeftIndex);
+	bool GetAvailable() const;
+	void SetAvailable(bool InAvailable);
 	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess = "true", BindWidget)) TObjectPtr<UImage> Image_GridSlot;
@@ -37,4 +46,8 @@ private:
 	
 	int32 TileIndex;
 	EInv_GridSlotState State;
+	int32 StackCount;
+	int32 UpperLeftIndex = INDEX_NONE;
+	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
+	bool bAvailable = true;
 };
