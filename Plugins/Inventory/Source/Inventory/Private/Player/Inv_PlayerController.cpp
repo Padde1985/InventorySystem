@@ -55,6 +55,12 @@ void AInv_PlayerController::SetupInputComponent()
 
 void AInv_PlayerController::PrimaryInteract()
 {
+	if (!this->ThisActor.IsValid()) return;
+	
+	UInv_ItemComponent* ItemComp = this->ThisActor->FindComponentByClass<UInv_ItemComponent>();
+	if (!IsValid(ItemComp) || !this->InventoryComponent.IsValid()) return;
+	
+	this->InventoryComponent->TryAddItem(ItemComp);
 }
 
 void AInv_PlayerController::CreateHUDWidget()

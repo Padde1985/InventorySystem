@@ -15,6 +15,7 @@ class INVENTORY_API UInv_SpatialInventory : public UInv_InventoryBase
 
 public:
 	virtual void NativeOnInitialized() override;
+	virtual FInv_SlotAvailabilityResult HasRoomForItem(UInv_ItemComponent* Component) const override;
 
 private:
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget)) TObjectPtr<UInv_InventoryGrid> Grid_Equippables;

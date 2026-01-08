@@ -1,4 +1,5 @@
 #include "Items/Components/Inv_ItemComponent.h"
+#include "Net/UnrealNetwork.h"
 
 UInv_ItemComponent::UInv_ItemComponent()
 {
@@ -10,5 +11,17 @@ UInv_ItemComponent::UInv_ItemComponent()
 FString UInv_ItemComponent::GetPickupMessage() const
 {
 	return this->PickupMessage;
+}
+
+void UInv_ItemComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ThisClass, ItemManifest);
+}
+
+FInv_ItemManifest UInv_ItemComponent::GetItemManifest() const
+{
+	return this->ItemManifest;
 }
 

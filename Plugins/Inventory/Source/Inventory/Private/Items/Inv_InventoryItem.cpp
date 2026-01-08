@@ -1,0 +1,30 @@
+﻿#include "Items/Inv_InventoryItem.h"
+#include "Net/UnrealNetwork.h"
+
+void UInv_InventoryItem::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	DOREPLIFETIME(ThisClass, ItemManifest);
+}
+
+void UInv_InventoryItem::SetItemManifest(const FInv_ItemManifest& Manifest)
+{
+	this->ItemManifest = FInstancedStruct::Make<FInv_ItemManifest>(Manifest);
+}
+
+const FInv_ItemManifest& UInv_InventoryItem::GetItemManifest() const
+{
+	return this->ItemManifest.Get<FInv_ItemManifest>();
+}
+
+FInv_ItemManifest& UInv_InventoryItem::GetItemManifestMutable()
+{
+	return this->ItemManifest.GetMutable<FInv_ItemManifest>();
+}
+
+bool UInv_InventoryItem::IsSupportedForNetworking() const
+{
+	// enable the item to be added to a replicated subobject list on clients
+	return true;
+}

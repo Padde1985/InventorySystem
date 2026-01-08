@@ -1,6 +1,10 @@
 #include "Widgets/Inventory/Spatial/Inv_SpatialInventory.h"
+
+#include "Inventory.h"
 #include "Components/Button.h"
 #include "Components/WidgetSwitcher.h"
+#include "InventoryManagement/Utils/Inv_InventoryStatics.h"
+#include "Items/Components/Inv_ItemComponent.h"
 #include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
 
 void UInv_SpatialInventory::NativeOnInitialized()
@@ -12,6 +16,22 @@ void UInv_SpatialInventory::NativeOnInitialized()
 	this->Button_Craftables->OnClicked.AddDynamic(this, &ThisClass::ShowCraftables);
 	
 	this->ShowEquippables();
+}
+
+FInv_SlotAvailabilityResult UInv_SpatialInventory::HasRoomForItem(UInv_ItemComponent* Component) const
+{
+	switch (UInv_InventoryStatics::GetItemCategoryByItemComponent(Component))
+	{
+	case EInv_ItemCategory::Equippable:
+		return this->Grid_Equippables->HasRoomForItem(Component);
+	case EInv_ItemCategory::Consumable:
+		return this->Grid_Consumables->HasRoomForItem(Component);
+	case EInv_ItemCategory::Craftable:
+		return this->Grid_Craftables->HasRoomForItem(Component);
+	default:
+		UE_LOG(LogInventory, Error, TEXT("Item Component does not have a valid Item Category"));
+		return FInv_SlotAvailabilityResult();
+	}
 }
 
 void UInv_SpatialInventory::ShowEquippables()
