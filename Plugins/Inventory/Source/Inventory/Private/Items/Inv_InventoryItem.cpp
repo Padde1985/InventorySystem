@@ -1,4 +1,6 @@
 ﻿#include "Items/Inv_InventoryItem.h"
+
+#include "Items/Fragments/Inv_ItemFragment.h"
 #include "Net/UnrealNetwork.h"
 
 void UInv_InventoryItem::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -27,4 +29,11 @@ bool UInv_InventoryItem::IsSupportedForNetworking() const
 {
 	// enable the item to be added to a replicated subobject list on clients
 	return true;
+}
+
+bool UInv_InventoryItem::IsStackable() const
+{
+	const FInv_StackableFragment* Stackable = this->GetItemManifest().GetFragmentByType<FInv_StackableFragment>();
+	
+	return Stackable != nullptr;
 }

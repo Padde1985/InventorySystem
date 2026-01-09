@@ -1,7 +1,9 @@
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 
+#include "Items/Components/Inv_ItemComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
+#include "Items/Inv_InventoryItem.h"
 
 // Sets default values for this component's properties
 UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
@@ -14,7 +16,10 @@ UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 
 void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 {
-	const FInv_SlotAvailabilityResult SlotAvailabilityResult = this->InventoryMenu->HasRoomForItem(ItemComponent);
+	FInv_SlotAvailabilityResult SlotAvailabilityResult = this->InventoryMenu->HasRoomForItem(ItemComponent);
+	UInv_InventoryItem* FoundItem = this->InventoryList.FindFirstItemByType(ItemComponent->GetItemManifest().GetItemType());
+	SlotAvailabilityResult.InventoryItem = FoundItem;
+	
 	if (SlotAvailabilityResult.TotalRoomToFill == 0)
 	{
 		this->InventorySpace.Broadcast();

@@ -18,6 +18,7 @@ struct INVENTORY_API FInv_ItemManifest
 	UInv_InventoryItem* Manifest(UObject* NewOuter);
 	FGameplayTag GetItemType() const;
 	template <typename T> requires std::derived_from<T, FInv_ItemFragment> const T* GetFragmentByTag(const FGameplayTag& FragmentTag) const;
+	template <typename T> requires std::derived_from<T, FInv_ItemFragment> const T* GetFragmentByType() const;
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") EInv_ItemCategory ItemCategory = EInv_ItemCategory::None;
@@ -35,6 +36,20 @@ const T* FInv_ItemManifest::GetFragmentByTag(const FGameplayTag& FragmentTag) co
 		{
 			if (!FragmentPtr->GetFragmentTag().MatchesTagExact(FragmentTag)) continue;
 			
+			return FragmentPtr;
+		}
+	}
+	
+	return nullptr;
+}
+
+template <typename T> requires std::derived_from<T, FInv_ItemFragment>
+const T* FInv_ItemManifest::GetFragmentByType() const
+{
+	for (const TInstancedStruct<FInv_ItemFragment>& Fragment : this->Fragments)
+	{
+		if (const T* FragmentPtr = Fragment.GetPtr<T>())
+		{
 			return FragmentPtr;
 		}
 	}
