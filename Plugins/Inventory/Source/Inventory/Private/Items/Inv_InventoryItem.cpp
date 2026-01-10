@@ -8,6 +8,7 @@ void UInv_InventoryItem::GetLifetimeReplicatedProps(TArray<class FLifetimeProper
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 	
 	DOREPLIFETIME(ThisClass, ItemManifest);
+	DOREPLIFETIME(ThisClass, TotalStackCount);
 }
 
 void UInv_InventoryItem::SetItemManifest(const FInv_ItemManifest& Manifest)
@@ -36,4 +37,14 @@ bool UInv_InventoryItem::IsStackable() const
 	const FInv_StackableFragment* Stackable = this->GetItemManifest().GetFragmentByType<FInv_StackableFragment>();
 	
 	return Stackable != nullptr;
+}
+
+int32 UInv_InventoryItem::GetStackCount() const
+{
+	return this->TotalStackCount;
+}
+
+void UInv_InventoryItem::SetStackCount(int32 Count)
+{
+	this->TotalStackCount = Count;
 }

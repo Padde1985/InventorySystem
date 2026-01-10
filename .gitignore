@@ -78,3 +78,7 @@ DerivedDataCache/*
 #ignore the same folders in the plugin folder for this version
 Plugins/Inventory/Binaries/*
 Plugins/Inventory/Intermediate/*
+
+#don't ignore Plugin code itself
+!Plugins/Inventory/Source/*
+!Plugins/Inventory/Content/*

@@ -25,3 +25,9 @@ FInv_ItemManifest UInv_ItemComponent::GetItemManifest() const
 	return this->ItemManifest;
 }
 
+void UInv_ItemComponent::PickedUp()
+{
+	this->OnPickedUp();
+	GetOwner()->Destroy();
+}
+

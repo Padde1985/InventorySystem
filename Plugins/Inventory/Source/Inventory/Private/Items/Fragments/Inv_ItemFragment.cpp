@@ -44,3 +44,8 @@ int32 FInv_StackableFragment::GetStackCount() const
 {
 	return this->StackCount;
 }
+
+void FInv_StackableFragment::SetStackCount(int32 Count)
+{
+	this->StackCount = Count;
+}

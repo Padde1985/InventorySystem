@@ -4,6 +4,7 @@
 #include "Net/UnrealNetwork.h"
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 #include "Items/Inv_InventoryItem.h"
+#include "Items/Fragments/Inv_ItemFragment.h"
 
 // Sets default values for this component's properties
 UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
@@ -28,6 +29,7 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 	
 	if (SlotAvailabilityResult.InventoryItem.IsValid() && SlotAvailabilityResult.bIsStackable)
 	{
+		this->OnStackChange.Broadcast(SlotAvailabilityResult);
 		//add stacks to existing item
 		this->Server_AddStacksToItem(ItemComponent, SlotAvailabilityResult.TotalRoomToFill, SlotAvailabilityResult.Remainder);
 	}
@@ -41,15 +43,32 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
 {
 	UInv_InventoryItem* NewItem = this->InventoryList.AddEntry(ItemComponent);
+	NewItem->SetStackCount(StackCount);
 	
 	if (GetOwner()->GetNetMode() == ENetMode::NM_ListenServer || GetOwner()->GetNetMode() == ENetMode::NM_Standalone)
 	{
 		this->OnItemAdded.Broadcast(NewItem);
 	}
+	
+	ItemComponent->PickedUp();
 }
 
 void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder)
 {
+	const FGameplayTag& ItemType = IsValid(ItemComponent) ? ItemComponent->GetItemManifest().GetItemType() : FGameplayTag::EmptyTag;
+	UInv_InventoryItem* Item = this->InventoryList.FindFirstItemByType(ItemType);
+	if (!IsValid(Item)) return;
+	
+	Item->SetStackCount(Item->GetStackCount() + StackCount);
+	
+	if (Remainder == 0)
+	{
+		ItemComponent->PickedUp();
+	}
+	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifest().GetFragmentByTypeMutable<FInv_StackableFragment>())
+	{
+		StackableFragment->SetStackCount(Remainder);
+	}
 }
 
 void UInv_InventoryComponent::ToggleInventoryMenu()

@@ -19,6 +19,7 @@ struct INVENTORY_API FInv_ItemManifest
 	FGameplayTag GetItemType() const;
 	template <typename T> requires std::derived_from<T, FInv_ItemFragment> const T* GetFragmentByTag(const FGameplayTag& FragmentTag) const;
 	template <typename T> requires std::derived_from<T, FInv_ItemFragment> const T* GetFragmentByType() const;
+	template <typename T> requires std::derived_from<T, FInv_ItemFragment> T* GetFragmentByTypeMutable();
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") EInv_ItemCategory ItemCategory = EInv_ItemCategory::None;
@@ -49,6 +50,20 @@ const T* FInv_ItemManifest::GetFragmentByType() const
 	for (const TInstancedStruct<FInv_ItemFragment>& Fragment : this->Fragments)
 	{
 		if (const T* FragmentPtr = Fragment.GetPtr<T>())
+		{
+			return FragmentPtr;
+		}
+	}
+	
+	return nullptr;
+}
+
+template <typename T> requires std::derived_from<T, FInv_ItemFragment>
+T* FInv_ItemManifest::GetFragmentByTypeMutable()
+{
+	for (TInstancedStruct<FInv_ItemFragment>& Fragment : this->Fragments)
+	{
+		if (T* FragmentPtr = Fragment.GetMutablePtr<T>())
 		{
 			return FragmentPtr;
 		}
