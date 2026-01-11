@@ -5,6 +5,8 @@
 #include "Types/Inv_GridTypes.h"
 #include "Inv_InventoryGrid.generated.h"
 
+enum class EInv_GridSlotState : uint8;
+class UInv_HoverItem;
 struct FInv_ImageFragment;
 struct FInv_GridFragment;
 class UInv_SlottedItem;
@@ -37,8 +39,18 @@ private:
 	UPROPERTY(meta = (BindWidget)) TObjectPtr<UCanvasPanel> CanvasPanel;
 	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UInv_SlottedItem> SlottedItemClass;
 	UPROPERTY() TMap<int32, TObjectPtr<UInv_SlottedItem>> SlottedItems;
+	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UInv_HoverItem> HoverItemClass;
+	UPROPERTY() TObjectPtr<UInv_HoverItem> HoverItem;
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
+	FInv_TileParameters TileParameters;
+	FInv_TileParameters LastTileParameters;
+	int32 ItemDropIndex = INDEX_NONE; // Index where item would be placed
+	FInv_SpaceQueryResult CurrentQueryResult;
+	bool bMouseWithinCanvas;
+	bool bLastMouseWithinCanvas;
+	int32 LastHighlightedIndex;
+	FIntPoint LastHighlightedDimensions;
 	
 	void ConstructGrid();
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
@@ -55,6 +67,24 @@ private:
 	bool CheckSlotConstraints(const UInv_GridSlot* SubGridSlot, const TSet<int32>& CheckedIndices, TSet<int32>& OutTentativelyClaimed, const UInv_GridSlot* GridSlot, const FGameplayTag& ItemTag, const int32 MaxStackSize) const;
 	bool IsInGridBounds(const int32 StartIndex, const FIntPoint& ItemDimensions) const;
 	int32 DetermineFillAmountForSLot(const bool bStackable, const int32 MaxStackSize, const int32 Amount, const UInv_GridSlot* GridSlot) const;
+	bool IsRightCLick(const FPointerEvent& MouseEvent) const;
+	bool IsLeftCLick(const FPointerEvent& MouseEvent) const;
+	void Pickup(UInv_InventoryItem* ClickedItem, const int32 GridIndex);
+	void AssignHoverItem(UInv_InventoryItem* Item);
+	void AssignHoverItem(UInv_InventoryItem* Item, const int32 GridIndex, const int32 PreviousGridIndex);
+	void RemoveItemFromGrid(UInv_InventoryItem* Item, const int32 GridIndex);
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	void UpdateTileParameters(const FVector2D& CanvasPosition, const FVector2D& MousePosition);
+	FIntPoint CalculcateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
+	EInv_TileQuadrant CalculateTileQuadrant(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const;
+	void OnTileParametersUpdated(const FInv_TileParameters& Params);
+	FIntPoint CalculateStartingCoordinate(const FIntPoint& Coordinate, const FIntPoint& Dimensions, const EInv_TileQuadrant Quadrant) const;
+	FInv_SpaceQueryResult CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions);
+	bool CursorExitedCanvas(const FVector2D& CanvasPos, const FVector2D& CanvasSize, const FVector2D& Location);
+	void HighlightSlots(const int32 Index, const FIntPoint& Dimensions);
+	void UnHighlightSlots(const int32 Index, const FIntPoint& Dimensions);
+	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState State);
 
 	UFUNCTION() void AddStacks(const FInv_SlotAvailabilityResult& Result);
+	UFUNCTION() void OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
 };

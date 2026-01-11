@@ -1,4 +1,6 @@
 #include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
+
+#include "Inventory.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanel.h"
 #include "Components/CanvasPanelSlot.h"
@@ -11,6 +13,7 @@
 #include "Items/Fragments/Inv_FragmentTags.h"
 #include "Items/Fragments/Inv_ItemFragment.h"
 #include "Items/Manifest/Inv_ItemManifest.h"
+#include "Widgets/Inventory/HoverItem/Inv_HoverItem.h"
 #include "Widgets/Inventory/SlottedItems/Inv_SlottedItem.h"
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* InventoryItem)
@@ -138,6 +141,7 @@ UInv_SlottedItem* UInv_InventoryGrid::CreateSlottedItem(UInv_InventoryItem* Item
     
     const int32 StackUpdateAmount = bStackable ? StackAmount : 0;
     SlottedItem->UpdateStackCount(StackUpdateAmount);
+    SlottedItem->OnSlottedItemClicked.AddDynamic(this, &ThisClass::OnSlottedItemClicked);
     
     return SlottedItem;
 }
@@ -243,6 +247,288 @@ int32 UInv_InventoryGrid::DetermineFillAmountForSLot(const bool bStackable, cons
     return bStackable ? FMath::Min(Amount, RoomInSlot) : 1;
 }
 
+bool UInv_InventoryGrid::IsRightCLick(const FPointerEvent& MouseEvent) const
+{
+    return MouseEvent.GetEffectingButton() == EKeys::RightMouseButton;
+}
+
+bool UInv_InventoryGrid::IsLeftCLick(const FPointerEvent& MouseEvent) const
+{
+    return MouseEvent.GetEffectingButton() == EKeys::LeftMouseButton;
+}
+
+void UInv_InventoryGrid::Pickup(UInv_InventoryItem* ClickedItem, const int32 GridIndex)
+{
+    this->AssignHoverItem(ClickedItem, GridIndex, GridIndex);
+    this->RemoveItemFromGrid(ClickedItem, GridIndex);
+}
+
+void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* Item)
+{
+    if (!IsValid(this->HoverItem))
+    {
+        this->HoverItem = CreateWidget<UInv_HoverItem>(GetOwningPlayer(), this->HoverItemClass);
+    }
+    
+    const FInv_GridFragment* GridFragment = UInv_InventoryStatics::GetFragment<FInv_GridFragment>(Item, FragmentTags::GridFragment);
+    const FInv_ImageFragment* ImageFragment = UInv_InventoryStatics::GetFragment<FInv_ImageFragment>(Item, FragmentTags::IconFragment);
+    if (!GridFragment || !ImageFragment) return;
+    
+    const FVector2D DrawSize = this->GetDrawSize(GridFragment);
+    FSlateBrush IconBrush;
+    IconBrush.SetResourceObject(ImageFragment->GetIcon());
+    IconBrush.DrawAs = ESlateBrushDrawType::Image;
+    IconBrush.ImageSize = DrawSize * UWidgetLayoutLibrary::GetViewportScale(this);
+    
+    this->HoverItem->SetImageBrush(IconBrush);
+    this->HoverItem->SetGridDimensions(GridFragment->GetGridSize());
+    this->HoverItem->SetInventoryItem(Item);
+    this->HoverItem->SetIsStackable(Item->IsStackable());
+    
+    GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default, this->HoverItem);
+}
+
+void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* Item, const int32 GridIndex, const int32 PreviousGridIndex)
+{
+    this->AssignHoverItem(Item);
+    
+    this->HoverItem->SetPreviousGridIndex(PreviousGridIndex);
+    this->HoverItem->UpdateStackCount(Item->IsStackable() ? this->GridSlots[GridIndex]->GetStackCount() : 0);
+}
+
+void UInv_InventoryGrid::RemoveItemFromGrid(UInv_InventoryItem* Item, const int32 GridIndex)
+{
+    const FInv_GridFragment* GridFragment = UInv_InventoryStatics::GetFragment<FInv_GridFragment>(Item, FragmentTags::GridFragment);
+    if (!GridFragment) return;
+    
+    UInv_InventoryStatics::ForEach2D(this->GridSlots, GridIndex, GridFragment->GetGridSize(), this->Columns, [&](UInv_GridSlot* GridSlot)
+    {
+        GridSlot->SetInventoryItem(nullptr);
+        GridSlot->SetUpperLeftIndex(INDEX_NONE);
+        GridSlot->SetUnoccupiedTexture();
+        GridSlot->SetAvailable(true);
+        GridSlot->SetStackCount(0);
+    });
+    
+    if (this->SlottedItems.Contains(GridIndex))
+    {
+        TObjectPtr<UInv_SlottedItem> SlottedItem;
+        this->SlottedItems.RemoveAndCopyValue(GridIndex, SlottedItem);
+        SlottedItem->RemoveFromParent();
+    }
+}
+
+void UInv_InventoryGrid::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
+{
+    Super::NativeTick(MyGeometry, InDeltaTime);
+    
+    const FVector2D CanvasPos = UInv_WidgetUtils::GetWidgetPosition(this->CanvasPanel);
+    const FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
+    
+    if (this->CursorExitedCanvas(CanvasPos, UInv_WidgetUtils::GetWidgetSize(this->CanvasPanel), MousePos))
+    {
+        return;
+    }
+    
+    this->UpdateTileParameters(CanvasPos, MousePos);
+}
+
+void UInv_InventoryGrid::UpdateTileParameters(const FVector2D& CanvasPosition, const FVector2D& MousePosition)
+{
+    if (!this->bMouseWithinCanvas) return;
+    
+    const FIntPoint HoveredTileCoordinates = this->CalculcateHoveredCoordinates(CanvasPosition, MousePosition);
+    
+    this->LastTileParameters = this->TileParameters;
+    this->TileParameters.TileCoordinates = HoveredTileCoordinates;
+    this->TileParameters.TileIndex = UInv_WidgetUtils::GetIndexByPosition(HoveredTileCoordinates, this->Columns);
+    this->TileParameters.TileQuadrant = this->CalculateTileQuadrant(CanvasPosition, MousePosition);
+    
+   this->OnTileParametersUpdated(this->TileParameters);
+}
+
+FIntPoint UInv_InventoryGrid::CalculcateHoveredCoordinates(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const
+{
+    return FIntPoint {
+        static_cast<int32>(FMath::FloorToInt((MousePosition.X - CanvasPosition.X) / this->TileSize)),
+        static_cast<int32>(FMath::FloorToInt((MousePosition.Y - CanvasPosition.Y) / this->TileSize))
+    };
+}
+
+EInv_TileQuadrant UInv_InventoryGrid::CalculateTileQuadrant(const FVector2D& CanvasPosition, const FVector2D& MousePosition) const
+{
+    const float TileLocalX = FMath::Fmod((MousePosition.X - CanvasPosition.X), this->TileSize);
+    const float TileLocalY = FMath::Fmod((MousePosition.Y - CanvasPosition.Y), this->TileSize);
+    const bool bIsTop = TileLocalY < this->TileSize / 2.f; //Top if Y is in the upper half
+    const bool bIsLeft = TileLocalX < this->TileSize / 2.f; //Top if Y is in the left half
+    
+    EInv_TileQuadrant TileQuadrant = EInv_TileQuadrant::None;
+    if (bIsLeft && bIsTop) TileQuadrant = EInv_TileQuadrant::TopLeft;
+    else if (!bIsLeft && bIsTop) TileQuadrant = EInv_TileQuadrant::TopRight;
+    else if (bIsLeft && !bIsTop) TileQuadrant = EInv_TileQuadrant::BottomLeft;
+    else if (!bIsLeft && !bIsTop) TileQuadrant = EInv_TileQuadrant::BottomRight;
+    
+    return TileQuadrant;
+}
+
+void UInv_InventoryGrid::OnTileParametersUpdated(const FInv_TileParameters& Params)
+{
+    if (!IsValid(this->HoverItem)) return;
+    
+    const FIntPoint Dimensions = this->HoverItem->GetGridDimension();
+    const FIntPoint StartingCoordinate = this->CalculateStartingCoordinate(Params.TileCoordinates, Dimensions, Params.TileQuadrant);
+    this->ItemDropIndex = UInv_WidgetUtils::GetIndexByPosition(StartingCoordinate, this->Columns);
+    
+    this->CurrentQueryResult = this->CheckHoverPosition(StartingCoordinate, Dimensions);
+    
+    if (this->CurrentQueryResult.bHasSpace)
+    {
+        this->HighlightSlots(this->ItemDropIndex, Dimensions);
+        return;
+    }
+    this->UnHighlightSlots(this->LastHighlightedIndex, this->LastHighlightedDimensions);
+    
+    if (this->CurrentQueryResult.ValidItem.IsValid() && this->GridSlots.IsValidIndex(this->CurrentQueryResult.UpperLeftIndex))
+    {
+        const FInv_GridFragment* GridFragment = UInv_InventoryStatics::GetFragment<FInv_GridFragment>(this->CurrentQueryResult.ValidItem.Get(), FragmentTags::GridFragment);
+        if (!GridFragment) return;
+        
+        this->ChangeHoverType(this->CurrentQueryResult.UpperLeftIndex, GridFragment->GetGridSize(), EInv_GridSlotState::GrayedOut);
+    }
+}
+
+FIntPoint UInv_InventoryGrid::CalculateStartingCoordinate(const FIntPoint& Coordinate, const FIntPoint& Dimensions, const EInv_TileQuadrant Quadrant) const
+{
+    const int32 HasEvenWidth = Dimensions.X % 2 == 0 ? 1 : 0;
+    const int32 HasEvenHeight = Dimensions.Y % 2 == 0 ? 1 : 0;
+    
+    FIntPoint StartingCoordinate;
+    StartingCoordinate.X = Coordinate.X - FMath::FloorToInt(0.5f * Dimensions.X);
+    StartingCoordinate.Y = Coordinate.Y - FMath::FloorToInt(0.5f * Dimensions.Y);
+    
+    switch (Quadrant)
+    {
+        case EInv_TileQuadrant::TopLeft:
+            // nothing to do            
+            break;
+        case EInv_TileQuadrant::TopRight:
+            StartingCoordinate.X += HasEvenWidth;
+            break;
+        case EInv_TileQuadrant::BottomLeft:
+            StartingCoordinate.Y += HasEvenHeight;
+            break;
+        case EInv_TileQuadrant::BottomRight:
+            StartingCoordinate.X += HasEvenWidth;
+            StartingCoordinate.Y += HasEvenHeight;
+            break;
+        case EInv_TileQuadrant::None:
+            UE_LOG(LogInventory, Error, TEXT("Invalid Quadrant"));
+            return FIntPoint (-1, -1);
+    }
+    
+    return StartingCoordinate;
+}
+
+FInv_SpaceQueryResult UInv_InventoryGrid::CheckHoverPosition(const FIntPoint& Position, const FIntPoint& Dimensions)
+{
+    FInv_SpaceQueryResult Result;
+    
+    if (!this->IsInGridBounds(UInv_WidgetUtils::GetIndexByPosition(Position, this->Columns), Dimensions)) return Result;
+    
+    Result.bHasSpace = true;
+    
+    TSet<int32> OccupiedUpperLeftIndices;
+    UInv_InventoryStatics::ForEach2D(this->GridSlots, UInv_WidgetUtils::GetIndexByPosition(Position, this->Columns), Dimensions, this->Columns, [&](const UInv_GridSlot* HoverSlot)
+    {
+        if (HoverSlot->GetInventoryItem().IsValid())
+        {
+            OccupiedUpperLeftIndices.Add(HoverSlot->GetUpperLeftIndex());
+            Result.bHasSpace = false;
+            if (OccupiedUpperLeftIndices.Num() > 1) return; // no need to continue checking if there is already one other item found
+        }
+    });
+    
+    if (OccupiedUpperLeftIndices.Num() == 1)
+    {
+        const int32 Index = *OccupiedUpperLeftIndices.CreateConstIterator();
+        Result.ValidItem = this->GridSlots[Index]->GetInventoryItem();
+        Result.UpperLeftIndex = Index;
+    }
+    
+    return Result;
+}
+
+bool UInv_InventoryGrid::CursorExitedCanvas(const FVector2D& CanvasPos, const FVector2D& CanvasSize, const FVector2D& Location)
+{
+    this->bLastMouseWithinCanvas = this->bMouseWithinCanvas;
+    this->bMouseWithinCanvas = UInv_WidgetUtils::IsWithinBounds(CanvasPos, CanvasSize, Location);
+    
+    if (!this->bMouseWithinCanvas && this->bLastMouseWithinCanvas)
+    {
+        this->UnHighlightSlots(this->LastHighlightedIndex, this->LastHighlightedDimensions);
+        return true;
+    }
+    
+    return false;
+}
+
+void UInv_InventoryGrid::HighlightSlots(const int32 Index, const FIntPoint& Dimensions)
+{
+    if (!this->bMouseWithinCanvas) return;
+    
+    this->UnHighlightSlots(this->LastHighlightedIndex, this->LastHighlightedDimensions);
+    
+    UInv_InventoryStatics::ForEach2D(this->GridSlots, Index, Dimensions, this->Columns, [&](UInv_GridSlot* HoverSlot)
+    {
+        HoverSlot->SetOccupiedTexture();
+    });
+    
+    this->LastHighlightedDimensions = Dimensions;
+    this->LastHighlightedIndex = Index;
+}
+
+void UInv_InventoryGrid::UnHighlightSlots(const int32 Index, const FIntPoint& Dimensions)
+{
+    UInv_InventoryStatics::ForEach2D(this->GridSlots, Index, Dimensions, this->Columns, [&](UInv_GridSlot* HoverSlot)
+    {
+        if (HoverSlot->GetAvailable())
+        {
+            HoverSlot->SetUnoccupiedTexture();
+        }
+        else
+        {
+            HoverSlot->SetOccupiedTexture();
+        }
+    });
+}
+
+void UInv_InventoryGrid::ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState State)
+{
+    this->UnHighlightSlots(this->LastHighlightedIndex, this->LastHighlightedDimensions);
+    
+    UInv_InventoryStatics::ForEach2D(this->GridSlots, Index, Dimensions, this->Columns, [State](UInv_GridSlot* HoverSlot)
+    {
+        switch (State)
+        {
+            case EInv_GridSlotState::Occupied:
+                HoverSlot->SetOccupiedTexture();
+                break;
+            case EInv_GridSlotState::Unoccupied:
+                HoverSlot->SetUnoccupiedTexture();
+                break;
+            case EInv_GridSlotState::GrayedOut:
+                HoverSlot->SetGrayedOutTexture();
+                break;
+            case EInv_GridSlotState::Selected:
+                HoverSlot->SetSelectedTexture();
+                break;
+        }
+    });
+    
+    this->LastHighlightedIndex = Index;
+    this->LastHighlightedDimensions = Dimensions;
+}
+
 void UInv_InventoryGrid::AddStacks(const FInv_SlotAvailabilityResult& Result)
 {
     if (!MatchesCategory(Result.InventoryItem.Get())) return;
@@ -261,6 +547,18 @@ void UInv_InventoryGrid::AddStacks(const FInv_SlotAvailabilityResult& Result)
             this->AddItemAtIndex(Result.InventoryItem.Get(), Availability.Index, Result.bIsStackable, Availability.AmountToFill);
             this->UpdateGridSlots(Result.InventoryItem.Get(), Availability.Index, Result.bIsStackable, Availability.AmountToFill);
         }
+    }
+}
+
+void UInv_InventoryGrid::OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent)
+{
+    check(this->GridSlots.IsValidIndex(GridIndex));
+    
+    UInv_InventoryItem* ClickedItem = this->GridSlots[GridIndex]->GetInventoryItem().Get();
+    
+    if (!IsValid(this->HoverItem) && this->IsLeftCLick(MouseEvent))
+    {
+        this->Pickup(ClickedItem, GridIndex);
     }
 }
 

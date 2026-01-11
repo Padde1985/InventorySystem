@@ -44,9 +44,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") FSlateBrush Brush_Selected;
 	UPROPERTY(EditAnywhere, Category = "Inventory") FSlateBrush Brush_GrayedOut;
 	
-	int32 TileIndex;
+	int32 TileIndex = INDEX_NONE;
 	EInv_GridSlotState State;
-	int32 StackCount;
+	int32 StackCount = 0;
 	int32 UpperLeftIndex = INDEX_NONE;
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
 	bool bAvailable = true;

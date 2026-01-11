@@ -39,3 +39,38 @@ struct FInv_SlotAvailability
 	int32 AmountToFill = 0.f;
 	bool bItemAtIndex = false;
 };
+
+UENUM(BlueprintType)
+enum class EInv_TileQuadrant : uint8
+{
+	TopLeft,
+	TopRight,
+	BottomLeft,
+	BottomRight,
+	None
+};
+
+USTRUCT(BlueprintType)
+struct FInv_TileParameters
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory") FIntPoint TileCoordinates {};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory") int32 TileIndex = INDEX_NONE;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory") EInv_TileQuadrant TileQuadrant = EInv_TileQuadrant::None;
+};
+
+inline bool operator==(const FInv_TileParameters& A, const FInv_TileParameters& B)
+{
+	return A.TileCoordinates == B.TileCoordinates && A.TileIndex == B.TileIndex && A.TileQuadrant == B.TileQuadrant;
+}
+
+USTRUCT()
+struct FInv_SpaceQueryResult
+{
+	GENERATED_BODY()
+
+	bool bHasSpace = false; // True if queried space has no item
+	TWeakObjectPtr<UInv_InventoryItem> ValidItem = nullptr; // item that can be swapped
+	int32 UpperLeftIndex = INDEX_NONE; // index of thew swappable item
+};
