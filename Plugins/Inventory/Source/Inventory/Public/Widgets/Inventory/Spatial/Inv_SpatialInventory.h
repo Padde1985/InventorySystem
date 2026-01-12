@@ -25,6 +25,8 @@ private:
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UButton> Button_Equippables;
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UButton> Button_Consumables;
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UButton> Button_Craftables;
+	
+	TWeakObjectPtr<UInv_InventoryGrid> ActiveGrid;
 
 	UFUNCTION() void ShowEquippables();
 	UFUNCTION() void ShowConsumables();

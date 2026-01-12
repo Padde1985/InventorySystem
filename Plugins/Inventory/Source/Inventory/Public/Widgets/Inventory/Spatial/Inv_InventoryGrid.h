@@ -28,6 +28,8 @@ public:
 	EInv_ItemCategory GetItemCategory() const;
 	virtual void NativeOnInitialized() override;
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* Component);
+	void ShowMouseCursor();
+	void HideMouseCursor();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true")) EInv_ItemCategory ItemCategory;
@@ -41,6 +43,10 @@ private:
 	UPROPERTY() TMap<int32, TObjectPtr<UInv_SlottedItem>> SlottedItems;
 	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UInv_HoverItem> HoverItemClass;
 	UPROPERTY() TObjectPtr<UInv_HoverItem> HoverItem;
+	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UUserWidget> VisibleCursorWidgetClass;
+	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UUserWidget> HiddenCursorWidgetClass;
+	UPROPERTY() TObjectPtr<UUserWidget> VisibleCursorWidget;
+	UPROPERTY() TObjectPtr<UUserWidget> HiddenCursorWidget;
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
 	FInv_TileParameters TileParameters;
@@ -84,7 +90,18 @@ private:
 	void HighlightSlots(const int32 Index, const FIntPoint& Dimensions);
 	void UnHighlightSlots(const int32 Index, const FIntPoint& Dimensions);
 	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState State);
+	void PutDownAtIndex(const int32 Index);
+	void ClearHoverItem();
+	UUserWidget* GetVisibleCursorWidget();
+	UUserWidget* GetHiddenCursorWidget();
+	void SwapWithHoverItem(UInv_InventoryItem* Item, const int32 Index);
+	void SwapStackCounts(const int32 ClickedStackCount, const int32 HoveredStackCount, const int32 Index);
+	void ConsumeHoverItemStacks(const int32 ClickedStackCount, const int32 HoveredStackCount, const int32 Index);
+	void FillInStack(const int32 FillAmount, const int32 Remainder, const int32 Index);
 
 	UFUNCTION() void AddStacks(const FInv_SlotAvailabilityResult& Result);
-	UFUNCTION() void OnSlottedItemClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
+	UFUNCTION() void OnSlottedItemClicked(const int32 GridIndex, const FPointerEvent& MouseEvent);
+	UFUNCTION() void OnGridSlotClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
+	UFUNCTION() void OnGridSlotHovered(int32 GridIndex, const FPointerEvent& MouseEvent);
+	UFUNCTION() void OnGridSlotUnhovered(int32 GridIndex, const FPointerEvent& MouseEvent);
 };

@@ -8,8 +8,10 @@ void UInv_HoverItem::SetImageBrush(const FSlateBrush& Brush) const
 	this->Image_Icon->SetBrush(Brush);
 }
 
-void UInv_HoverItem::UpdateStackCount(int32 Count) const
+void UInv_HoverItem::UpdateStackCount(int32 Count)
 {
+	this->StackCount = Count;
+	
 	if (Count > 0)
 	{
 		this->Text_StackCount->SetText(FText::AsNumber(Count));

@@ -80,3 +80,24 @@ void UInv_GridSlot::SetAvailable(bool InAvailable)
 {
 	this->bAvailable = InAvailable;
 }
+
+void UInv_GridSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseEnter(InGeometry, InMouseEvent);
+	
+	this->GridSlotHovered.Broadcast(this->TileIndex, InMouseEvent);
+}
+
+void UInv_GridSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	Super::NativeOnMouseLeave(InMouseEvent);
+	
+	this->GridSlotUnhovered.Broadcast(this->TileIndex, InMouseEvent);
+}
+
+FReply UInv_GridSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	this->GridSLotClicked.Broadcast(this->TileIndex, InMouseEvent);
+	
+	return FReply::Handled();
+}

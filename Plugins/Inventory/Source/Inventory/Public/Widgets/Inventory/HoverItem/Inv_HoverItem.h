@@ -16,7 +16,7 @@ class INVENTORY_API UInv_HoverItem : public UUserWidget
 	
 public:
 	void SetImageBrush(const FSlateBrush& Brush) const;
-	void UpdateStackCount(int32 Count) const;
+	void UpdateStackCount(int32 Count);
 	FGameplayTag GetItemType() const;
 	int32 GetStackCount() const;
 	bool IsStackable() const;

@@ -51,6 +51,10 @@ void UInv_SpatialInventory::ShowCraftables()
 
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)
 {
+	if (this->ActiveGrid.IsValid()) this->ActiveGrid->HideMouseCursor();
+	this->ActiveGrid = Grid;
+	if (this->ActiveGrid.IsValid()) this->ActiveGrid->ShowMouseCursor();
+	
 	this->DisableButton(Button);
 	this->Switcher->SetActiveWidget(Grid);
 }
