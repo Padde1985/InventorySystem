@@ -5,6 +5,7 @@
 #include "Types/Inv_GridTypes.h"
 #include "Inv_InventoryGrid.generated.h"
 
+class UInv_ItemPopup;
 enum class EInv_GridSlotState : uint8;
 class UInv_HoverItem;
 struct FInv_ImageFragment;
@@ -30,6 +31,7 @@ public:
 	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_ItemComponent* Component);
 	void ShowMouseCursor();
 	void HideMouseCursor();
+	void SetOwningCanvasPanel(UCanvasPanel* Owner);
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true")) EInv_ItemCategory ItemCategory;
@@ -47,8 +49,11 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UUserWidget> HiddenCursorWidgetClass;
 	UPROPERTY() TObjectPtr<UUserWidget> VisibleCursorWidget;
 	UPROPERTY() TObjectPtr<UUserWidget> HiddenCursorWidget;
+	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UInv_ItemPopup> ItemPopupWidgetClass;
+	UPROPERTY() TObjectPtr<UInv_ItemPopup> ItemPopupWidget;
 	
 	TWeakObjectPtr<UInv_InventoryComponent> InventoryComponent;
+	TWeakObjectPtr<UCanvasPanel> OwningCanvasPanel;
 	FInv_TileParameters TileParameters;
 	FInv_TileParameters LastTileParameters;
 	int32 ItemDropIndex = INDEX_NONE; // Index where item would be placed
@@ -98,10 +103,14 @@ private:
 	void SwapStackCounts(const int32 ClickedStackCount, const int32 HoveredStackCount, const int32 Index);
 	void ConsumeHoverItemStacks(const int32 ClickedStackCount, const int32 HoveredStackCount, const int32 Index);
 	void FillInStack(const int32 FillAmount, const int32 Remainder, const int32 Index);
+	void CreateItemPopup(const int32 Index);
 
 	UFUNCTION() void AddStacks(const FInv_SlotAvailabilityResult& Result);
 	UFUNCTION() void OnSlottedItemClicked(const int32 GridIndex, const FPointerEvent& MouseEvent);
 	UFUNCTION() void OnGridSlotClicked(int32 GridIndex, const FPointerEvent& MouseEvent);
 	UFUNCTION() void OnGridSlotHovered(int32 GridIndex, const FPointerEvent& MouseEvent);
 	UFUNCTION() void OnGridSlotUnhovered(int32 GridIndex, const FPointerEvent& MouseEvent);
+	UFUNCTION() void OnPopupMenuSplit(int32 SplitAmount, int32 Index);
+	UFUNCTION() void OnPopupMenuDrop(int32 Index);
+	UFUNCTION() void OnPopupMenuConsume(int32 Index);
 };

@@ -4,6 +4,7 @@
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 #include "Inv_SpatialInventory.generated.h"
 
+class UCanvasPanel;
 class UInv_InventoryGrid;
 class UWidgetSwitcher;
 class UButton;
@@ -25,6 +26,7 @@ private:
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UButton> Button_Equippables;
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UButton> Button_Consumables;
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UButton> Button_Craftables;
+	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UCanvasPanel> CanvasPanel;
 	
 	TWeakObjectPtr<UInv_InventoryGrid> ActiveGrid;
 

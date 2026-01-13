@@ -1,10 +1,7 @@
 ﻿#include "InventoryManagement/FastArray/Inv_FastArray.h"
-
-#include "ToolMenusEditor.h"
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 #include "Items/Inv_InventoryItem.h"
 #include "Items/Components/Inv_ItemComponent.h"
-#include "Tests/ToolMenusTestUtilities.h"
 
 TArray<UInv_InventoryItem*> FInv_InventoryFastArray::GetInventoryItems() const
 {

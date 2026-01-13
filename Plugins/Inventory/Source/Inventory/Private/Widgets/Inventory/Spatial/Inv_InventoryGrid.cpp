@@ -1,5 +1,4 @@
 #include "Widgets/Inventory/Spatial/Inv_InventoryGrid.h"
-
 #include "Inventory.h"
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "Components/CanvasPanel.h"
@@ -15,6 +14,7 @@
 #include "Items/Manifest/Inv_ItemManifest.h"
 #include "Widgets/Inventory/HoverItem/Inv_HoverItem.h"
 #include "Widgets/Inventory/SlottedItems/Inv_SlottedItem.h"
+#include "Widgets/ItemPopup/Inv_ItemPopup.h"
 
 void UInv_InventoryGrid::AddItem(UInv_InventoryItem* InventoryItem)
 {
@@ -625,6 +625,43 @@ void UInv_InventoryGrid::FillInStack(const int32 FillAmount, const int32 Remaind
     this->HoverItem->UpdateStackCount(Remainder);
 }
 
+void UInv_InventoryGrid::CreateItemPopup(const int32 Index)
+{
+    UInv_InventoryItem* Item = this->GridSlots[Index]->GetInventoryItem().Get();
+    if (!IsValid(Item)) return;
+    if (IsValid(this->GridSlots[Index]->GetItemPopup())) return;
+    
+    this->ItemPopupWidget = CreateWidget<UInv_ItemPopup>(this, this->ItemPopupWidgetClass);
+    this->GridSlots[Index]->SetItemPopup(this->ItemPopupWidget);
+    this->OwningCanvasPanel->AddChild(this->ItemPopupWidget);
+    UCanvasPanelSlot* CanvasSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(this->ItemPopupWidget);
+    const FVector2D MousePos = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer());
+    CanvasSlot->SetPosition(MousePos);
+    CanvasSlot->SetSize(this->ItemPopupWidget->GetBoxSize());
+    
+    this->ItemPopupWidget->DropDelegate.BindDynamic(this, &ThisClass::OnPopupMenuDrop);
+    
+    const int32 SliderMax = this->GridSlots[Index]->GetStackCount() - 1;
+    if (Item->IsStackable() && SliderMax > 0)
+    {
+        this->ItemPopupWidget->SplitDelegate.BindDynamic(this, &ThisClass::OnPopupMenuSplit);
+        this->ItemPopupWidget->SetSliderParams(SliderMax, FMath::Max(1, this->GridSlots[Index]->GetStackCount() / 2));
+    }
+    else
+    {
+        this->ItemPopupWidget->CollapseSplitButton();
+    }
+    
+    if (Item->IsConsumable())
+    {
+        this->ItemPopupWidget->ConsumeDelegate.BindDynamic(this, &ThisClass::OnPopupMenuConsume);
+    }
+    else
+    {
+        this->ItemPopupWidget->CollapseConsumeButton();
+    }
+}
+
 void UInv_InventoryGrid::ShowMouseCursor()
 {
     if (!IsValid(GetOwningPlayer())) return;
@@ -637,6 +674,11 @@ void UInv_InventoryGrid::HideMouseCursor()
     if (!IsValid(GetOwningPlayer())) return;
     
     GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default, this->GetHiddenCursorWidget());
+}
+
+void UInv_InventoryGrid::SetOwningCanvasPanel(UCanvasPanel* Owner)
+{
+    this->OwningCanvasPanel = Owner;
 }
 
 void UInv_InventoryGrid::AddStacks(const FInv_SlotAvailabilityResult& Result)
@@ -669,6 +711,12 @@ void UInv_InventoryGrid::OnSlottedItemClicked(const int32 GridIndex, const FPoin
     if (!IsValid(this->HoverItem) && this->IsLeftCLick(MouseEvent))
     {
         this->Pickup(ClickedItem, GridIndex);
+        return;
+    }
+    
+    if (this->IsRightCLick(MouseEvent))
+    {
+        this->CreateItemPopup(GridIndex);
         return;
     }
     
@@ -744,6 +792,32 @@ void UInv_InventoryGrid::OnGridSlotUnhovered(int32 GridIndex, const FPointerEven
     {
         GridSlot->SetUnoccupiedTexture();
     }
+}
+
+void UInv_InventoryGrid::OnPopupMenuSplit(int32 SplitAmount, int32 Index)
+{
+    UInv_InventoryItem* Item = this->GridSlots[Index]->GetInventoryItem().Get();
+    if (!Item) return;
+    if (!Item->IsStackable()) return;
+    
+    const int32 UpperLeftIndex = this->GridSlots[Index]->GetUpperLeftIndex();
+    UInv_GridSlot* GridSlot = this->GridSlots[UpperLeftIndex];
+    const int32 StackCount = GridSlot->GetStackCount();
+    const int32 NewStackCount = StackCount - SplitAmount;
+    
+    GridSlot->SetStackCount(NewStackCount);
+    this->SlottedItems.FindChecked(UpperLeftIndex)->UpdateStackCount(NewStackCount);
+    
+    this->AssignHoverItem(Item, UpperLeftIndex, UpperLeftIndex);
+    this->HoverItem->UpdateStackCount(SplitAmount);
+}
+
+void UInv_InventoryGrid::OnPopupMenuDrop(int32 Index)
+{
+}
+
+void UInv_InventoryGrid::OnPopupMenuConsume(int32 Index)
+{
 }
 
 void UInv_InventoryGrid::ConstructGrid()

@@ -48,3 +48,8 @@ void UInv_InventoryItem::SetStackCount(int32 Count)
 {
 	this->TotalStackCount = Count;
 }
+
+bool UInv_InventoryItem::IsConsumable() const
+{
+	return this->GetItemManifest().GetItemCategory() == EInv_ItemCategory::Consumable;
+}

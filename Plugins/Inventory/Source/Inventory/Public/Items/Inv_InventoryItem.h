@@ -20,6 +20,7 @@ public:
 	bool IsStackable() const;
 	int32 GetStackCount() const;
 	void SetStackCount(int32 Count);
+	bool IsConsumable() const;
 	
 private:
 	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (BaseStruct = "/Script/Inventory.Inv_ItemManifest"), Replicated) FInstancedStruct ItemManifest;

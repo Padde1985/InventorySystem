@@ -4,6 +4,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Inv_GridSlot.generated.h"
 
+class UInv_ItemPopup;
 class UInv_InventoryItem;
 class UImage;
 
@@ -45,6 +46,8 @@ public:
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	void SetItemPopup(UInv_ItemPopup* Popup);
+	UInv_ItemPopup* GetItemPopup() const;
 	
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "", meta = (AllowPrivateAccess = "true", BindWidget)) TObjectPtr<UImage> Image_GridSlot;
@@ -59,4 +62,7 @@ private:
 	int32 UpperLeftIndex = INDEX_NONE;
 	TWeakObjectPtr<UInv_InventoryItem> InventoryItem;
 	bool bAvailable = true;
+	TWeakObjectPtr<UInv_ItemPopup> ItemPopup;
+	
+	UFUNCTION() void OnItemPopupDestruct(UUserWidget* Menu);
 };

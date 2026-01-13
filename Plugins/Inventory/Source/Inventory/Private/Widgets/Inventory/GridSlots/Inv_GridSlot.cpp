@@ -1,6 +1,7 @@
 ﻿#include "Widgets/Inventory/GridSlots/Inv_GridSlot.h"
 #include "Components/Image.h"
 #include "Items/Inv_InventoryItem.h"
+#include "Widgets/ItemPopup/Inv_ItemPopup.h"
 
 void UInv_GridSlot::SetTileIndex(int32 InTileIndex)
 {
@@ -100,4 +101,21 @@ FReply UInv_GridSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const
 	this->GridSLotClicked.Broadcast(this->TileIndex, InMouseEvent);
 	
 	return FReply::Handled();
+}
+
+void UInv_GridSlot::SetItemPopup(UInv_ItemPopup* Popup)
+{
+	this->ItemPopup = Popup;
+	this->ItemPopup->SetGridIndex(this->GetTileIndex());
+	this->ItemPopup->OnNativeDestruct.AddUObject(this, &UInv_GridSlot::OnItemPopupDestruct);
+}
+
+UInv_ItemPopup* UInv_GridSlot::GetItemPopup() const
+{
+	return this->ItemPopup.Get();
+}
+
+void UInv_GridSlot::OnItemPopupDestruct(UUserWidget* Menu)
+{
+	this->ItemPopup.Reset();
 }
