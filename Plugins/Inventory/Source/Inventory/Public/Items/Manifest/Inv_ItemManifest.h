@@ -20,11 +20,13 @@ struct INVENTORY_API FInv_ItemManifest
 	template <typename T> requires std::derived_from<T, FInv_ItemFragment> const T* GetFragmentByTag(const FGameplayTag& FragmentTag) const;
 	template <typename T> requires std::derived_from<T, FInv_ItemFragment> const T* GetFragmentByType() const;
 	template <typename T> requires std::derived_from<T, FInv_ItemFragment> T* GetFragmentByTypeMutable();
+	void SpawnPickupActor(const UObject* WorldContextObject, const FVector& SpawnLocation, const FRotator& SpawnRotation);
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") EInv_ItemCategory ItemCategory = EInv_ItemCategory::None;
 	UPROPERTY(EditAnywhere, Category = "Inventory") FGameplayTag ItemType;
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct)) TArray<TInstancedStruct<FInv_ItemFragment>> Fragments;
+	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<AActor> PickupActorClass;
 };
 
 // only types derived from FInv+ItemFragment are allowed

@@ -4,6 +4,7 @@
 UInv_ItemComponent::UInv_ItemComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
 
 	this->PickupMessage = FString("E - Pick up Item");
 }
@@ -29,5 +30,10 @@ void UInv_ItemComponent::PickedUp()
 {
 	this->OnPickedUp();
 	GetOwner()->Destroy();
+}
+
+void UInv_ItemComponent::InitItemManifest(FInv_ItemManifest CopyOfManifest)
+{
+	this->ItemManifest = CopyOfManifest;
 }
 

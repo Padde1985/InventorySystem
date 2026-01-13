@@ -38,6 +38,13 @@ FInv_SlotAvailabilityResult UInv_SpatialInventory::HasRoomForItem(UInv_ItemCompo
 	}
 }
 
+FReply UInv_SpatialInventory::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	this->ActiveGrid->DropItem();
+	
+	return FReply::Handled();
+}
+
 void UInv_SpatialInventory::ShowEquippables()
 {
 	this->SetActiveGrid(this->Grid_Equippables, this->Button_Equippables);

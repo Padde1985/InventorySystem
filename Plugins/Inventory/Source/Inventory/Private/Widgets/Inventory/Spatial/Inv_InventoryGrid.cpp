@@ -662,6 +662,17 @@ void UInv_InventoryGrid::CreateItemPopup(const int32 Index)
     }
 }
 
+void UInv_InventoryGrid::DropItem()
+{
+    if (!IsValid(this->HoverItem)) return;
+    if (!IsValid(this->HoverItem->GetInventoryItem())) return;
+    
+    this->InventoryComponent->Server_DropItem(this->HoverItem->GetInventoryItem(), this->HoverItem->GetStackCount());
+    
+    this->ClearHoverItem();
+    this->ShowMouseCursor();
+}
+
 void UInv_InventoryGrid::ShowMouseCursor()
 {
     if (!IsValid(GetOwningPlayer())) return;
@@ -814,6 +825,11 @@ void UInv_InventoryGrid::OnPopupMenuSplit(int32 SplitAmount, int32 Index)
 
 void UInv_InventoryGrid::OnPopupMenuDrop(int32 Index)
 {
+    UInv_InventoryItem* Item = this->GridSlots[Index]->GetInventoryItem().Get();
+    if (!IsValid(Item)) return;
+    
+    this->Pickup(Item, Index);
+    this->DropItem();
 }
 
 void UInv_InventoryGrid::OnPopupMenuConsume(int32 Index)
