@@ -36,6 +36,7 @@ public:
 	void ToggleInventoryMenu();
 	void AddRepSubObj(UObject* SubObj);
 	void SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount);
+	UInv_InventoryBase* GetInventoryMenu() const;
 
 protected:
 	// Called when the game starts

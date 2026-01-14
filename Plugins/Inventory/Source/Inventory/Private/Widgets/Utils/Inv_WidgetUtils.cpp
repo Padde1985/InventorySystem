@@ -33,3 +33,28 @@ FVector2D UInv_WidgetUtils::GetWidgetSize(UWidget* Widget)
 {
 	return Widget->GetCachedGeometry().GetLocalSize();
 }
+
+FVector2D UInv_WidgetUtils::GetClampedWidgetPosition(const FVector2D& Boundary, const FVector2D& WidgetSize, const FVector2D& MousePos)
+{
+	FVector2D ClampedPos = MousePos;
+	
+	if (MousePos.X + WidgetSize.X > Boundary.X) //exceeds the right edge of the screen
+	{
+		ClampedPos.X = Boundary.X - WidgetSize.X;
+	}
+	if (MousePos.X < 0.f) // exceeds the left edge
+	{
+		ClampedPos.X = 0.f;
+	}
+	
+	if (MousePos.Y + WidgetSize.Y > Boundary.Y) // exceeds the bottom edge
+	{
+		ClampedPos.Y = Boundary.Y - WidgetSize.Y;
+	}
+	if (MousePos.Y < 0.f) // exceeds the top edge
+	{
+		ClampedPos.Y = 0.f;
+	}
+	
+	return ClampedPos;
+}

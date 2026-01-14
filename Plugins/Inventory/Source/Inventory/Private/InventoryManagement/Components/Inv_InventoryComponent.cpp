@@ -138,6 +138,11 @@ void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 S
 	ItemManifest.SpawnPickupActor(this, SpawnLocation, Rotation);
 }
 
+UInv_InventoryBase* UInv_InventoryComponent::GetInventoryMenu() const
+{
+	return this->InventoryMenu;
+}
+
 // Called when the game starts
 void UInv_InventoryComponent::BeginPlay()
 {

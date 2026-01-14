@@ -33,6 +33,7 @@ public:
 	void HideMouseCursor();
 	void SetOwningCanvasPanel(UCanvasPanel* Owner);
 	void DropItem();
+	bool HasHoverItem() const;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true")) EInv_ItemCategory ItemCategory;

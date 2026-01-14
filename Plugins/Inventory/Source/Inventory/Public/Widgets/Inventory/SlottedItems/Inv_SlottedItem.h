@@ -30,6 +30,8 @@ public:
 	UInv_InventoryItem* GetInventoryItem() const;
 	void UpdateStackCount(int32 StackCount);
 	virtual FReply NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
 	
 private:
 	UPROPERTY(meta = (BindWidget)) TObjectPtr<UImage> Image_Icon;

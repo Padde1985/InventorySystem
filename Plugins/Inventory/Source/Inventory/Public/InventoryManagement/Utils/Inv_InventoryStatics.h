@@ -18,6 +18,8 @@ class INVENTORY_API UInv_InventoryStatics : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, Category="Inventory") static UInv_InventoryComponent* GetInventoryComponent(const APlayerController* PlayerController);
 	UFUNCTION(BlueprintCallable, Category="Inventory") static EInv_ItemCategory GetItemCategoryByItemComponent(UInv_ItemComponent* ItemComponent);
+	UFUNCTION(BlueprintCallable, Category="Inventory") static void ItemHovered(APlayerController* PlayerController, UInv_InventoryItem* Item);
+	UFUNCTION(BlueprintCallable, Category="Inventory") static void ItemUnhovered(APlayerController* PlayerController); 
 	template <typename FragmentType> static const FragmentType* GetFragment(UInv_InventoryItem* Item, const FGameplayTag& Tag);
 	template <typename T, typename FuncT> static void ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 Columns, const FuncT& Func);
 };

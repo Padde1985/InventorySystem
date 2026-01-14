@@ -1,6 +1,7 @@
 ﻿#include "Widgets/Inventory/SlottedItems/Inv_SlottedItem.h"
 #include "Components/Image.h"
 #include "Components/TextBlock.h"
+#include "InventoryManagement/Utils/Inv_InventoryStatics.h"
 
 void UInv_SlottedItem::SetIsStackable(bool bStackable)
 {
@@ -70,4 +71,14 @@ FReply UInv_SlottedItem::NativeOnMouseButtonDown(const FGeometry& InGeometry, co
 	this->OnSlottedItemClicked.Broadcast(this->GridIndex, InMouseEvent);
 	
 	return FReply::Handled();
+}
+
+void UInv_SlottedItem::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
+{
+	UInv_InventoryStatics::ItemHovered(GetOwningPlayer(), this->InventoryItem.Get());
+}
+
+void UInv_SlottedItem::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
+{
+	UInv_InventoryStatics::ItemUnhovered(GetOwningPlayer());
 }
