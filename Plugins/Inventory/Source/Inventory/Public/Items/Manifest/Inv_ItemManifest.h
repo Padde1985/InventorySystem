@@ -24,7 +24,7 @@ struct INVENTORY_API FInv_ItemManifest
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") EInv_ItemCategory ItemCategory = EInv_ItemCategory::None;
-	UPROPERTY(EditAnywhere, Category = "Inventory") FGameplayTag ItemType;
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (Categories = "GameItems")) FGameplayTag ItemType;
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct)) TArray<TInstancedStruct<FInv_ItemFragment>> Fragments;
 	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<AActor> PickupActorClass;
 };

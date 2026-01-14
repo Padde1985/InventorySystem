@@ -4,6 +4,8 @@
 #include "GameplayTagContainer.h"
 #include "Inv_ItemFragment.generated.h"
 
+class APlayerController;
+
 USTRUCT(BlueprintType)
 struct FInv_ItemFragment
 {
@@ -20,7 +22,7 @@ struct FInv_ItemFragment
 	FGameplayTag GetFragmentTag() const;
 	void SetFragmentTag(FGameplayTag Tag);
 private:
-	UPROPERTY(EditAnywhere, Category = "Inventory") FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (Categories = "FragmentTags")) FGameplayTag FragmentTag = FGameplayTag::EmptyTag;
 };
 
 USTRUCT(BlueprintType)
@@ -60,4 +62,32 @@ struct FInv_StackableFragment : public FInv_ItemFragment
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") int32 MaxStackSize = 1;
 	UPROPERTY(EditAnywhere, Category = "Inventory") int32 StackCount = 1;
+};
+
+USTRUCT(BlueprintType)
+struct FInv_ConsumableFragment : public FInv_ItemFragment
+{
+	GENERATED_BODY()
+	
+	virtual void OnConsume(APlayerController* PC);
+};
+
+USTRUCT(BlueprintType)
+struct FInv_HealthPotionFragment : public FInv_ConsumableFragment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Inventory") float HealAmount = 20.f; // or anything else
+	
+	 virtual void OnConsume(APlayerController* PC) override;
+};
+
+USTRUCT(BlueprintType)
+struct FInv_ManaPotionFragment : public FInv_ConsumableFragment
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, Category = "Inventory") float ManaAmount = 20.f; // or anything else
+	
+	virtual void OnConsume(APlayerController* PC) override;
 };

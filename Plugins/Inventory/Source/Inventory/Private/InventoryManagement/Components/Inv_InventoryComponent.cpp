@@ -86,6 +86,24 @@ void UInv_InventoryComponent::Server_DropItem_Implementation(UInv_InventoryItem*
 	this->SpawnDroppedItem(Item, StackCount);
 }
 
+void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryItem* Item)
+{
+	const int32 NewStackCount = Item->GetStackCount() - 1;
+	if (NewStackCount <= 0)
+	{
+		this->InventoryList.RemoveEntry(Item);
+	}
+	else
+	{
+		Item->SetStackCount(NewStackCount);
+	}
+	
+	if (FInv_ConsumableFragment* ConsumableFragment = Item->GetItemManifestMutable().GetFragmentByTypeMutable<FInv_ConsumableFragment>())
+	{
+		ConsumableFragment->OnConsume(this->OwningController.Get());
+	}
+}
+
 void UInv_InventoryComponent::ToggleInventoryMenu()
 {
 	if (this->bInventoryMenuOpen)

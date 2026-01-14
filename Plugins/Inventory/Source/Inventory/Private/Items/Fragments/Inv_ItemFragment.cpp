@@ -49,3 +49,20 @@ void FInv_StackableFragment::SetStackCount(int32 Count)
 {
 	this->StackCount = Count;
 }
+
+void FInv_ConsumableFragment::OnConsume(APlayerController* PC)
+{
+	//do something generic
+}
+
+void FInv_HealthPotionFragment::OnConsume(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Health Potion consumed healing by: %f"), this->HealAmount));
+	// do something specific
+}
+
+void FInv_ManaPotionFragment::OnConsume(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Blue, FString::Printf(TEXT("Mana Potion consumed healing by: %f"), this->ManaAmount));
+	// do something specific
+}
