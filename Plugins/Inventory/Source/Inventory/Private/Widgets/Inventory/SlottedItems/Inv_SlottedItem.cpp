@@ -45,7 +45,7 @@ FIntPoint UInv_SlottedItem::GetGridDimensions() const
 
 void UInv_SlottedItem::SetInventoryItem(UInv_InventoryItem* Item)
 {
-	this->InventoryItem = InventoryItem;
+	this->InventoryItem = Item;
 }
 
 UInv_InventoryItem* UInv_SlottedItem::GetInventoryItem() const

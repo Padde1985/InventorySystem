@@ -49,13 +49,16 @@ FReply UInv_SpatialInventory::NativeOnMouseButtonDown(const FGeometry& InGeometr
 
 void UInv_SpatialInventory::OnItemHovered(UInv_InventoryItem* Item)
 {
-	this->GetItemDescription()->SetVisibility(ESlateVisibility::Collapsed);
+	const FInv_ItemManifest& Manifest = Item->GetItemManifest();
+	UInv_ItemDescription* DescriptionWidget = this->GetItemDescription();
+	DescriptionWidget->SetVisibility(ESlateVisibility::Collapsed);
 	
 	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(this->DescriptionTimerHandle);
 	
 	FTimerDelegate TimerDelegate;
-	TimerDelegate.BindLambda([this]()
+	TimerDelegate.BindLambda([this, &Manifest, DescriptionWidget]()
 	{
+		Manifest.AssimilateInventoryFragments(DescriptionWidget);
 		this->GetItemDescription()->SetVisibility(ESlateVisibility::HitTestInvisible);
 	});
 	GetOwningPlayer()->GetWorldTimerManager().SetTimer(this->DescriptionTimerHandle, TimerDelegate, this->DescriptionTimerDelay, false);
