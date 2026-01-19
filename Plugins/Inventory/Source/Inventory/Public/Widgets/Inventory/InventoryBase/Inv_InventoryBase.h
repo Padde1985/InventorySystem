@@ -5,6 +5,7 @@
 #include "Types/Inv_GridTypes.h"
 #include "Inv_InventoryBase.generated.h"
 
+class UInv_HoverItem;
 class UInv_ItemComponent;
 
 UCLASS(PrioritizeCategories = ("Inventory"))
@@ -17,4 +18,5 @@ public:
 	virtual void OnItemHovered(UInv_InventoryItem *Item);
 	virtual void OnItemUnhovered();
 	virtual bool HasHoverItem() const;
+	virtual UInv_HoverItem* GetHoverItem() const;
 };

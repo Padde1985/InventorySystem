@@ -34,6 +34,7 @@ public:
 	void SetOwningCanvasPanel(UCanvasPanel* Owner);
 	void DropItem();
 	bool HasHoverItem() const;
+	UInv_HoverItem* GetHoverItem() const;
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true")) EInv_ItemCategory ItemCategory;

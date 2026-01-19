@@ -4,6 +4,7 @@
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 #include "Inv_SpatialInventory.generated.h"
 
+class UInv_EquippedGridSlot;
 class UInv_ItemDescription;
 class UCanvasPanel;
 class UInv_InventoryGrid;
@@ -23,6 +24,7 @@ public:
 	virtual void OnItemUnhovered() override;
 	virtual bool HasHoverItem() const override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
+	virtual UInv_HoverItem* GetHoverItem() const override;
 
 private:
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget)) TObjectPtr<UInv_InventoryGrid> Grid_Equippables;
@@ -36,6 +38,7 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UInv_ItemDescription> ItemDescriptionClass;
 	UPROPERTY() TObjectPtr<UInv_ItemDescription> ItemDescriptionWidget;
 	UPROPERTY(EditAnywhere, Category = "Inventory") float DescriptionTimerDelay = 0.5f;
+	UPROPERTY() TArray<TObjectPtr<UInv_EquippedGridSlot>> EquippedGridSlots;
 	
 	TWeakObjectPtr<UInv_InventoryGrid> ActiveGrid;
 	FTimerHandle DescriptionTimerHandle;
@@ -43,6 +46,7 @@ private:
 	UFUNCTION() void ShowEquippables();
 	UFUNCTION() void ShowConsumables();
 	UFUNCTION() void ShowCraftables();
+	UFUNCTION() void EquippedSlotClicked(UInv_EquippedGridSlot* GridSlot, const FGameplayTag& EquipmentTypeTag);
 
 	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 	void DisableButton(UButton* Button) const;

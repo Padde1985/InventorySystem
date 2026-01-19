@@ -17,3 +17,8 @@ bool UInv_InventoryBase::HasHoverItem() const
 {
 	return false;
 }
+
+UInv_HoverItem* UInv_InventoryBase::GetHoverItem() const
+{
+	return nullptr;
+}

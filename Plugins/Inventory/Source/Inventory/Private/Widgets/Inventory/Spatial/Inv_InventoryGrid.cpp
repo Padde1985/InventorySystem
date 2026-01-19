@@ -678,6 +678,11 @@ bool UInv_InventoryGrid::HasHoverItem() const
     return IsValid(this->HoverItem);
 }
 
+UInv_HoverItem* UInv_InventoryGrid::GetHoverItem() const
+{
+    return this->HoverItem;
+}
+
 void UInv_InventoryGrid::ShowMouseCursor()
 {
     if (!IsValid(GetOwningPlayer())) return;
