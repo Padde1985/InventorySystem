@@ -19,4 +19,5 @@ public:
 	virtual void OnItemUnhovered();
 	virtual bool HasHoverItem() const;
 	virtual UInv_HoverItem* GetHoverItem() const;
+	virtual float GetTileSize() const;
 };

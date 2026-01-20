@@ -4,6 +4,7 @@
 #include "Widgets/Inventory/InventoryBase/Inv_InventoryBase.h"
 #include "Inv_SpatialInventory.generated.h"
 
+class UInv_EquippedSlottedItem;
 class UInv_EquippedGridSlot;
 class UInv_ItemDescription;
 class UCanvasPanel;
@@ -25,6 +26,7 @@ public:
 	virtual bool HasHoverItem() const override;
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	virtual UInv_HoverItem* GetHoverItem() const override;
+	virtual float GetTileSize() const override;
 
 private:
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget)) TObjectPtr<UInv_InventoryGrid> Grid_Equippables;
@@ -47,9 +49,16 @@ private:
 	UFUNCTION() void ShowConsumables();
 	UFUNCTION() void ShowCraftables();
 	UFUNCTION() void EquippedSlotClicked(UInv_EquippedGridSlot* GridSlot, const FGameplayTag& EquipmentTypeTag);
+	UFUNCTION() void EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem);
 
 	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 	void DisableButton(UButton* Button) const;
 	UInv_ItemDescription* GetItemDescription();
 	void SetItemDescrptionSizeAndPosition(UInv_ItemDescription* ItemDescription, UCanvasPanel* Canvas) const;
+	bool CanEquipHoverItem(UInv_EquippedGridSlot* GridSlot, const FGameplayTag& EquipmentTypeTag) const;
+	UInv_EquippedGridSlot* FindSlotWithEquippedItem(UInv_InventoryItem* EquippedItem) const;
+	void ClearSlotOfItem(UInv_EquippedGridSlot* GridSlot) const;
+	void RemoveEquippedSlottedItem(UInv_EquippedSlottedItem* Item);
+	void MakeEquippedSlottedItem(UInv_EquippedSlottedItem* Item, UInv_EquippedGridSlot* GridSlot, UInv_InventoryItem* ItemToEquip);
+	void BroadcastSlotClickedDelegates(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip) const;
 };

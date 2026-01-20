@@ -149,3 +149,39 @@ struct FInv_TextFragment : public FInv_InventoryItemFragment
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory") FText FragmentText;
 };
+
+USTRUCT(BlueprintType)
+struct FInv_EquipmentFragment : public FInv_InventoryItemFragment
+{
+	GENERATED_BODY()
+	
+	void OnEquip(APlayerController* PC);
+	void OnUnequip(APlayerController* PC);
+	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+	
+private:
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct)) TArray<TInstancedStruct<FInv_EquipModifier>> EquipModifiers;
+	
+	bool bEquipped = false;
+};
+
+USTRUCT(BlueprintType)
+struct FInv_EquipModifier : public FInv_LabeledNumberFragment
+{
+	GENERATED_BODY()
+	
+	virtual void OnEquip(APlayerController* PC);
+	virtual void OnUnequip(APlayerController* PC);
+	
+private:
+	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct)) TArray<TInstancedStruct<FInv_ConsumeModifier>> ConsumeModifiers;
+};
+
+USTRUCT(BlueprintType)
+struct FInv_StrengthModifier : public FInv_EquipModifier
+{
+	GENERATED_BODY()
+	
+	virtual void OnEquip(APlayerController* PC) override;
+	virtual void OnUnequip(APlayerController* PC) override;
+};

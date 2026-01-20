@@ -35,6 +35,10 @@ public:
 	void DropItem();
 	bool HasHoverItem() const;
 	UInv_HoverItem* GetHoverItem() const;
+	float GetTileSize() const;
+	void ClearHoverItem();
+	void AssignHoverItem(UInv_InventoryItem* Item);
+	void OnHide();
 
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Inventory", meta = (AllowPrivateAccess = "true")) EInv_ItemCategory ItemCategory;
@@ -68,8 +72,8 @@ private:
 	
 	void ConstructGrid();
 	bool MatchesCategory(const UInv_InventoryItem* Item) const;
-	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item);
-	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest);
+	FInv_SlotAvailabilityResult HasRoomForItem(const UInv_InventoryItem* Item, const int32 StackAmountOverride = -1);
+	FInv_SlotAvailabilityResult HasRoomForItem(const FInv_ItemManifest& Manifest, const int32 StackAmountOverride = -1);
 	void AddItemToIndices(const FInv_SlotAvailabilityResult& Result, UInv_InventoryItem* NewItem);
 	FVector2D GetDrawSize(const FInv_GridFragment* GridFragment) const;
 	void SetSlottedItemImage(const UInv_SlottedItem* SlottedItem, const FInv_GridFragment* GridFragment, const FInv_ImageFragment* ImageFragment) const;
@@ -84,7 +88,6 @@ private:
 	bool IsRightCLick(const FPointerEvent& MouseEvent) const;
 	bool IsLeftCLick(const FPointerEvent& MouseEvent) const;
 	void Pickup(UInv_InventoryItem* ClickedItem, const int32 GridIndex);
-	void AssignHoverItem(UInv_InventoryItem* Item);
 	void AssignHoverItem(UInv_InventoryItem* Item, const int32 GridIndex, const int32 PreviousGridIndex);
 	void RemoveItemFromGrid(UInv_InventoryItem* Item, const int32 GridIndex);
 	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
@@ -99,7 +102,6 @@ private:
 	void UnHighlightSlots(const int32 Index, const FIntPoint& Dimensions);
 	void ChangeHoverType(const int32 Index, const FIntPoint& Dimensions, EInv_GridSlotState State);
 	void PutDownAtIndex(const int32 Index);
-	void ClearHoverItem();
 	UUserWidget* GetVisibleCursorWidget();
 	UUserWidget* GetHiddenCursorWidget();
 	void SwapWithHoverItem(UInv_InventoryItem* Item, const int32 Index);
@@ -107,6 +109,7 @@ private:
 	void ConsumeHoverItemStacks(const int32 ClickedStackCount, const int32 HoveredStackCount, const int32 Index);
 	void FillInStack(const int32 FillAmount, const int32 Remainder, const int32 Index);
 	void CreateItemPopup(const int32 Index);
+	void PutHoverItemBack();
 
 	UFUNCTION() void AddStacks(const FInv_SlotAvailabilityResult& Result);
 	UFUNCTION() void OnSlottedItemClicked(const int32 GridIndex, const FPointerEvent& MouseEvent);
@@ -116,4 +119,5 @@ private:
 	UFUNCTION() void OnPopupMenuSplit(int32 SplitAmount, int32 Index);
 	UFUNCTION() void OnPopupMenuDrop(int32 Index);
 	UFUNCTION() void OnPopupMenuConsume(int32 Index);
+	UFUNCTION() void OnInventoryMenuToggle(bool bOpen);
 };

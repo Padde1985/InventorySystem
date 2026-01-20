@@ -12,6 +12,8 @@ class UInv_InventoryBase;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryItemChange, UInv_InventoryItem*, Item);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FNoRoomInInvetory);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStackChange, const FInv_SlotAvailabilityResult&, Result);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FItemEquippedStatusChanged, UInv_InventoryItem*, Item);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FInventoryMenuToggled, bool, bOpen);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), PrioritizeCategories = ("Inventory"), Blueprintable)
 class INVENTORY_API UInv_InventoryComponent : public UActorComponent
@@ -23,6 +25,9 @@ public:
 	FInventoryItemChange OnItemRemoved;
 	FNoRoomInInvetory InventorySpace;
 	FStackChange OnStackChange;
+	FItemEquippedStatusChanged OnItemEquipped;
+	FItemEquippedStatusChanged OnItemUnequipped;
+	FInventoryMenuToggled OnInventoryMenuToggle;
 	
 	// Sets default values for this component's properties
 	UInv_InventoryComponent();
@@ -32,10 +37,12 @@ public:
 	UFUNCTION(Server, Reliable) void Server_AddStacksToItem(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder);
 	UFUNCTION(Server, Reliable) void Server_DropItem(UInv_InventoryItem* Item, int32 StackCount);
 	UFUNCTION(Server, Reliable) void Server_ConsumeItem(UInv_InventoryItem* Item);
+	UFUNCTION(Server, Reliable) void Server_EquippedSlotClicked(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip); // Server function
+	UFUNCTION(NetMulticast, Reliable) void Multicast_EquippedSlotClicked(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip); // same function called from server on all clients
 	
 	void ToggleInventoryMenu();
 	void AddRepSubObj(UObject* SubObj);
-	void SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount);
+	void SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount) const;
 	UInv_InventoryBase* GetInventoryMenu() const;
 
 protected:

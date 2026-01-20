@@ -104,6 +104,17 @@ void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryIt
 	}
 }
 
+void UInv_InventoryComponent::Server_EquippedSlotClicked_Implementation(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip)
+{
+	this->Multicast_EquippedSlotClicked(ItemToEquip, ItemToUnequip);
+}
+
+void UInv_InventoryComponent::Multicast_EquippedSlotClicked_Implementation(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip)
+{
+	this->OnItemEquipped.Broadcast(ItemToEquip);
+	this->OnItemUnequipped.Broadcast(ItemToUnequip);
+}
+
 void UInv_InventoryComponent::ToggleInventoryMenu()
 {
 	if (this->bInventoryMenuOpen)
@@ -114,6 +125,7 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 	{
 		this->OpenInventoryMenu();
 	}
+	this->OnInventoryMenuToggle.Broadcast(this->bInventoryMenuOpen);
 }
 
 void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
@@ -121,7 +133,7 @@ void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
 	if (IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))	AddReplicatedSubObject(SubObj);
 }
 
-void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount)
+void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount) const
 {
 	const APawn* OwningPawn = this->OwningController->GetPawn();
 	FVector Forward = OwningPawn->GetActorForwardVector();

@@ -7,6 +7,7 @@
 #include "Widgets/Utils/Inv_WidgetUtils.h"
 #include "Inv_InventoryStatics.generated.h"
 
+class UInv_InventoryBase;
 class UInv_ItemComponent;
 class UInv_InventoryComponent;
 class UInv_HoverItem;
@@ -22,6 +23,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Inventory") static void ItemHovered(APlayerController* PlayerController, UInv_InventoryItem* Item);
 	UFUNCTION(BlueprintCallable, Category="Inventory") static void ItemUnhovered(APlayerController* PlayerController);
 	UFUNCTION(BlueprintCallable, Category="Inventory") static UInv_HoverItem* GetHoverItem(APlayerController* PC);
+	static UInv_InventoryBase* GetInventoryWidget(APlayerController* PC);
 	template <typename FragmentType> static const FragmentType* GetFragment(UInv_InventoryItem* Item, const FGameplayTag& Tag);
 	template <typename T, typename FuncT> static void ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 Columns, const FuncT& Func);
 };

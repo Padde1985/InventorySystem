@@ -137,6 +137,59 @@ void FInv_TextFragment::SetText(const FText& Text)
 	this->FragmentText = Text;
 }
 
+void FInv_EquipmentFragment::OnEquip(APlayerController* PC)
+{
+	if (this->bEquipped) return;
+	
+	this->bEquipped = true;
+	for (TInstancedStruct<FInv_EquipModifier>& Modifier : this->EquipModifiers)
+	{
+		FInv_EquipModifier& ModRef = Modifier.GetMutable();
+		ModRef.OnEquip(PC);
+	}
+}
+
+void FInv_EquipmentFragment::OnUnequip(APlayerController* PC)
+{
+	if (!this->bEquipped) return;
+	
+	this->bEquipped = false;
+	for (TInstancedStruct<FInv_EquipModifier>& Modifier : this->EquipModifiers)
+	{
+		FInv_EquipModifier& ModRef = Modifier.GetMutable();
+		ModRef.OnUnequip(PC);
+	}
+}
+
+void FInv_EquipmentFragment::Assimilate(UInv_CompositeBase* Composite) const
+{
+	FInv_InventoryItemFragment::Assimilate(Composite);
+	
+	for (const TInstancedStruct<FInv_EquipModifier>& Modifier : this->EquipModifiers)
+	{
+		const FInv_EquipModifier& ModRef = Modifier.Get();
+		ModRef.Assimilate(Composite);
+	}
+}
+
+void FInv_EquipModifier::OnEquip(APlayerController* PC)
+{
+}
+
+void FInv_EquipModifier::OnUnequip(APlayerController* PC)
+{
+}
+
+void FInv_StrengthModifier::OnEquip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("Strength increased by: %f"), GetValue()));
+}
+
+void FInv_StrengthModifier::OnUnequip(APlayerController* PC)
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("Strength decreased by: %f"), GetValue()));
+}
+
 void FInv_LabeledNumberFragment::Assimilate(UInv_CompositeBase* Composite) const
 {
 	FInv_InventoryItemFragment::Assimilate(Composite);
@@ -176,11 +229,7 @@ void FInv_ConsumeModifier::OnConsume(APlayerController* PC)
 
 void FInv_InventoryItemFragment::Assimilate(UInv_CompositeBase* Composite) const
 {
-	if (!this->MatchesWidgetTag(Composite))
-	{
-		Composite->Collapse();
-		return;
-	}
+	if (!this->MatchesWidgetTag(Composite))	return;
 	
 	Composite->Expand();
 }

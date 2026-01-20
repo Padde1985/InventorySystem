@@ -37,6 +37,7 @@ void UInv_InventoryGrid::NativeOnInitialized()
     this->InventoryComponent = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());
     this->InventoryComponent->OnItemAdded.AddDynamic(this, &UInv_InventoryGrid::AddItem);
     this->InventoryComponent->OnStackChange.AddDynamic(this, &UInv_InventoryGrid::AddStacks);
+    this->InventoryComponent->OnInventoryMenuToggle.AddDynamic(this, &UInv_InventoryGrid::OnInventoryMenuToggle);
 }
 
 FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemComponent* Component)
@@ -44,12 +45,12 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_ItemCo
     return this->HasRoomForItem(Component->GetItemManifest());
 }
 
-FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item)
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const UInv_InventoryItem* Item, const int32 StackAmountOverride)
 {
-    return this->HasRoomForItem(Item->GetItemManifest());
+    return this->HasRoomForItem(Item->GetItemManifest(), StackAmountOverride);
 }
 
-FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest)
+FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemManifest& Manifest, const int32 StackAmountOverride)
 {
     FInv_SlotAvailabilityResult Result;
     
@@ -58,6 +59,7 @@ FInv_SlotAvailabilityResult UInv_InventoryGrid::HasRoomForItem(const FInv_ItemMa
     
     const int32 MaxStackSize = Result.bIsStackable ? StackableFragment->GetMaxStackSize() : 1;
     int32 AmountToFill = Result.bIsStackable ? StackableFragment->GetStackCount() : 1;
+    if (StackAmountOverride != -1 && Result.bIsStackable) AmountToFill = StackAmountOverride;
     
     TSet<int32> CheckedIndices;
     for (const TObjectPtr<UInv_GridSlot>& GridSlot : this->GridSlots)
@@ -286,6 +288,11 @@ void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* Item)
     this->HoverItem->SetIsStackable(Item->IsStackable());
     
     GetOwningPlayer()->SetMouseCursorWidget(EMouseCursor::Default, this->HoverItem);
+}
+
+void UInv_InventoryGrid::OnHide()
+{
+    this->PutHoverItemBack();
 }
 
 void UInv_InventoryGrid::AssignHoverItem(UInv_InventoryItem* Item, const int32 GridIndex, const int32 PreviousGridIndex)
@@ -662,6 +669,22 @@ void UInv_InventoryGrid::CreateItemPopup(const int32 Index)
     }
 }
 
+void UInv_InventoryGrid::PutHoverItemBack()
+{
+    if (!IsValid(this->HoverItem)) return;
+    
+    FInv_SlotAvailabilityResult Result = this->HasRoomForItem(this->HoverItem->GetInventoryItem(), this->HoverItem->GetStackCount());
+    if (Result.TotalRoomToFill == 0)
+    {
+        this->DropItem();
+        return;
+    }
+    Result.InventoryItem = this->HoverItem->GetInventoryItem();
+    
+    this->AddStacks(Result);
+    this->ClearHoverItem();
+}
+
 void UInv_InventoryGrid::DropItem()
 {
     if (!IsValid(this->HoverItem)) return;
@@ -681,6 +704,11 @@ bool UInv_InventoryGrid::HasHoverItem() const
 UInv_HoverItem* UInv_InventoryGrid::GetHoverItem() const
 {
     return this->HoverItem;
+}
+
+float UInv_InventoryGrid::GetTileSize() const
+{
+    return this->TileSize;
 }
 
 void UInv_InventoryGrid::ShowMouseCursor()
@@ -774,7 +802,7 @@ void UInv_InventoryGrid::OnSlottedItemClicked(const int32 GridIndex, const FPoin
         if (RoomLeft == 0) return;
     }
     
-    this->SwapWithHoverItem(ClickedItem, GridIndex);
+    if (this->CurrentQueryResult.ValidItem.IsValid()) this->SwapWithHoverItem(ClickedItem, GridIndex);
 }
 
 void UInv_InventoryGrid::OnGridSlotClicked(int32 GridIndex, const FPointerEvent& MouseEvent)
@@ -787,6 +815,8 @@ void UInv_InventoryGrid::OnGridSlotClicked(int32 GridIndex, const FPointerEvent&
         this->OnSlottedItemClicked(this->CurrentQueryResult.UpperLeftIndex, MouseEvent);
         return;
     }
+    
+    if (!this->CurrentQueryResult.bHasSpace) return;
     
     TObjectPtr<UInv_GridSlot> GridSlot = this->GridSlots[this->ItemDropIndex];
     if (!GridSlot->GetInventoryItem().IsValid())
@@ -858,6 +888,14 @@ void UInv_InventoryGrid::OnPopupMenuConsume(int32 Index)
     this->InventoryComponent->Server_ConsumeItem(Item);
     
     if (NewStackCount <= 0) this->RemoveItemFromGrid(Item, Index);
+}
+
+void UInv_InventoryGrid::OnInventoryMenuToggle(bool bOpen)
+{
+    if (!bOpen)
+    {
+        this->PutHoverItemBack();
+    }
 }
 
 void UInv_InventoryGrid::ConstructGrid()

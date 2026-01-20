@@ -22,3 +22,8 @@ UInv_HoverItem* UInv_InventoryBase::GetHoverItem() const
 {
 	return nullptr;
 }
+
+float UInv_InventoryBase::GetTileSize() const
+{
+	return 0.f;
+}
