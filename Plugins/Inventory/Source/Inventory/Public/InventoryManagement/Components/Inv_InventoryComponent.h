@@ -33,7 +33,7 @@ public:
 	UInv_InventoryComponent();
 
 	UFUNCTION(BlueprintCallable, Category="Inventory", BlueprintAuthorityOnly) void TryAddItem(UInv_ItemComponent* ItemComponent);
-	UFUNCTION(Server, Reliable) void Server_AddNewItem(UInv_ItemComponent* ItemComponent, int32 StackCount);
+	UFUNCTION(Server, Reliable) void Server_AddNewItem(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder);
 	UFUNCTION(Server, Reliable) void Server_AddStacksToItem(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder);
 	UFUNCTION(Server, Reliable) void Server_DropItem(UInv_InventoryItem* Item, int32 StackCount);
 	UFUNCTION(Server, Reliable) void Server_ConsumeItem(UInv_InventoryItem* Item);
@@ -44,6 +44,7 @@ public:
 	void AddRepSubObj(UObject* SubObj);
 	void SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount) const;
 	UInv_InventoryBase* GetInventoryMenu() const;
+	bool IsMenuOpen() const;
 
 protected:
 	// Called when the game starts

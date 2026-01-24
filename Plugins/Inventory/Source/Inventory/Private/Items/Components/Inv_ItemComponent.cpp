@@ -26,6 +26,11 @@ FInv_ItemManifest UInv_ItemComponent::GetItemManifest() const
 	return this->ItemManifest;
 }
 
+FInv_ItemManifest& UInv_ItemComponent::GetItemManifestMutable()
+{
+	return this->ItemManifest;
+}
+
 void UInv_ItemComponent::PickedUp()
 {
 	this->OnPickedUp();

@@ -1,4 +1,5 @@
 ﻿#include "Items/Fragments/Inv_ItemFragment.h"
+#include "EquipmentManagement/EquipActor/Inv_EquipActor.h"
 #include "Widgets/Composite/Inv_CompositeBase.h"
 #include "Widgets/Composite/Inv_LeafImage.h"
 #include "Widgets/Composite/Inv_LeafLabeledValue.h"
@@ -172,6 +173,42 @@ void FInv_EquipmentFragment::Assimilate(UInv_CompositeBase* Composite) const
 	}
 }
 
+void FInv_EquipmentFragment::Manifest()
+{
+	FInv_InventoryItemFragment::Manifest();
+	
+	for (TInstancedStruct<FInv_EquipModifier>& Modifier : this->EquipModifiers)
+	{
+		FInv_EquipModifier& ModRef = Modifier.GetMutable();
+		ModRef.Manifest();
+	}
+}
+
+AInv_EquipActor* FInv_EquipmentFragment::SpawnAttachedActor(USkeletalMeshComponent* AttachMesh) const
+{
+	if (!IsValid(this->EquipActorClass) || !IsValid(AttachMesh)) return nullptr;
+	
+	AInv_EquipActor* SpawnActor = AttachMesh->GetWorld()->SpawnActor<AInv_EquipActor>(this->EquipActorClass);
+	SpawnActor->AttachToComponent(AttachMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, this->SocketAttachPoint);
+	
+	return SpawnActor;
+}
+
+void FInv_EquipmentFragment::DestroyAttachedActor()
+{
+	if (this->EquipActor.IsValid()) this->EquipActor.Reset(); this->EquipActor->Destroy();
+}
+
+FGameplayTag FInv_EquipmentFragment::GetEquipmentType() const
+{
+	return this->EquipmentType;
+}
+
+void FInv_EquipmentFragment::SetEquippedActor(AInv_EquipActor* Actor)
+{
+	this->EquipActor = Actor;
+}
+
 void FInv_EquipModifier::OnEquip(APlayerController* PC)
 {
 }
@@ -187,7 +224,7 @@ void FInv_StrengthModifier::OnEquip(APlayerController* PC)
 
 void FInv_StrengthModifier::OnUnequip(APlayerController* PC)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Emerald, FString::Printf(TEXT("Strength decreased by: %f"), GetValue()));
+	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Strength decreased by: %f"), GetValue()));
 }
 
 void FInv_LabeledNumberFragment::Assimilate(UInv_CompositeBase* Composite) const

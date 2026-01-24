@@ -816,6 +816,8 @@ void UInv_InventoryGrid::OnGridSlotClicked(int32 GridIndex, const FPointerEvent&
         return;
     }
     
+    if (!this->IsInGridBounds(this->ItemDropIndex, this->HoverItem->GetGridDimension())) return;
+    
     if (!this->CurrentQueryResult.bHasSpace) return;
     
     TObjectPtr<UInv_GridSlot> GridSlot = this->GridSlots[this->ItemDropIndex];

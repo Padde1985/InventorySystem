@@ -30,3 +30,8 @@ void UInv_Composite::Collapse()
 		Child->Collapse();
 	}
 }
+
+TArray<UInv_CompositeBase*> UInv_Composite::GetChildren() const
+{
+	return this->Children;
+}

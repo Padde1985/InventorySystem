@@ -12,7 +12,8 @@ class INVENTORY_API UInv_ItemDescription : public UInv_Composite
 	GENERATED_BODY()
 	
 public:
-	FVector2D GetBoxSize();
+	FVector2D GetBoxSize() const;
+	virtual void SetVisibility(ESlateVisibility InVisibility) override;
 	
 private:
 	UPROPERTY(meta = (BindWidget)) TObjectPtr<USizeBox> SizeBox;

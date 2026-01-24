@@ -16,6 +16,7 @@ namespace FragmentTags
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(FlavorTextFragment)
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(SellValueFragment)
 	UE_DECLARE_GAMEPLAY_TAG_EXTERN(RequiredLevelFragment)
+	UE_DECLARE_GAMEPLAY_TAG_EXTERN(EquipmentFragment)
 	
 	namespace StatModifier
 	{

@@ -5,6 +5,7 @@
 #include "StructUtils/InstancedStruct.h"
 #include "Inv_ItemFragment.generated.h"
 
+class AInv_EquipActor;
 class UInv_CompositeBase;
 class APlayerController;
 
@@ -158,11 +159,20 @@ struct FInv_EquipmentFragment : public FInv_InventoryItemFragment
 	void OnEquip(APlayerController* PC);
 	void OnUnequip(APlayerController* PC);
 	virtual void Assimilate(UInv_CompositeBase* Composite) const override;
+	virtual void Manifest() override;
+	AInv_EquipActor* SpawnAttachedActor(USkeletalMeshComponent* AttachMesh) const;
+	void DestroyAttachedActor();
+	FGameplayTag GetEquipmentType() const;
+	void SetEquippedActor(AInv_EquipActor* Actor);
 	
 private:
 	UPROPERTY(EditAnywhere, Category = "Inventory", meta = (ExcludeBaseStruct)) TArray<TInstancedStruct<FInv_EquipModifier>> EquipModifiers;
+	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<AInv_EquipActor> EquipActorClass = nullptr;
+	UPROPERTY(EditAnywhere, Category = "Inventory") FName SocketAttachPoint = FName();
+	UPROPERTY(EditAnywhere, Category = "Inventory") FGameplayTag EquipmentType = FGameplayTag::EmptyTag;
 	
 	bool bEquipped = false;
+	TWeakObjectPtr<AInv_EquipActor> EquipActor = nullptr;
 };
 
 USTRUCT(BlueprintType)

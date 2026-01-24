@@ -36,11 +36,11 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 	else if (SlotAvailabilityResult.TotalRoomToFill > 0)
 	{
 		//create new item and update slots
-		this->Server_AddNewItem(ItemComponent, SlotAvailabilityResult.bIsStackable ? SlotAvailabilityResult.TotalRoomToFill : 0);
+		this->Server_AddNewItem(ItemComponent, SlotAvailabilityResult.bIsStackable ? SlotAvailabilityResult.TotalRoomToFill : 0, SlotAvailabilityResult.Remainder);
 	}
 }
 
-void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount)
+void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder)
 {
 	UInv_InventoryItem* NewItem = this->InventoryList.AddEntry(ItemComponent);
 	NewItem->SetStackCount(StackCount);
@@ -50,7 +50,14 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 		this->OnItemAdded.Broadcast(NewItem);
 	}
 	
-	ItemComponent->PickedUp();
+	if (Remainder == 0)
+	{
+		ItemComponent->PickedUp();
+	}
+	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifestMutable().GetFragmentByTypeMutable<FInv_StackableFragment>())
+	{
+		StackableFragment->SetStackCount(Remainder);
+	}
 }
 
 void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder)
@@ -65,7 +72,7 @@ void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemCom
 	{
 		ItemComponent->PickedUp();
 	}
-	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifest().GetFragmentByTypeMutable<FInv_StackableFragment>())
+	else if (FInv_StackableFragment* StackableFragment = ItemComponent->GetItemManifestMutable().GetFragmentByTypeMutable<FInv_StackableFragment>())
 	{
 		StackableFragment->SetStackCount(Remainder);
 	}
@@ -153,6 +160,11 @@ void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 S
 UInv_InventoryBase* UInv_InventoryComponent::GetInventoryMenu() const
 {
 	return this->InventoryMenu;
+}
+
+bool UInv_InventoryComponent::IsMenuOpen() const
+{
+	return this->bInventoryMenuOpen;
 }
 
 // Called when the game starts

@@ -39,22 +39,29 @@ private:
 	UPROPERTY(meta = (AllowPrivateAccess = "true", BindWidget))	TObjectPtr<UCanvasPanel> CanvasPanel;
 	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UInv_ItemDescription> ItemDescriptionClass;
 	UPROPERTY() TObjectPtr<UInv_ItemDescription> ItemDescriptionWidget;
+	UPROPERTY(EditAnywhere, Category = "Inventory") TSubclassOf<UInv_ItemDescription> EquippedItemDescriptionClass;
+	UPROPERTY() TObjectPtr<UInv_ItemDescription> EquippedItemDescriptionWidget;
 	UPROPERTY(EditAnywhere, Category = "Inventory") float DescriptionTimerDelay = 0.5f;
+	UPROPERTY(EditAnywhere, Category = "Inventory") float EquippedDescriptionTimerDelay = 0.5f;
 	UPROPERTY() TArray<TObjectPtr<UInv_EquippedGridSlot>> EquippedGridSlots;
 	
 	TWeakObjectPtr<UInv_InventoryGrid> ActiveGrid;
 	FTimerHandle DescriptionTimerHandle;
+	FTimerHandle EquippedDescriptionTimerHandle;
 
 	UFUNCTION() void ShowEquippables();
 	UFUNCTION() void ShowConsumables();
 	UFUNCTION() void ShowCraftables();
 	UFUNCTION() void EquippedSlotClicked(UInv_EquippedGridSlot* GridSlot, const FGameplayTag& EquipmentTypeTag);
 	UFUNCTION() void EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem);
+	UFUNCTION() void ShowEquippedItemDescription(UInv_InventoryItem* Item);
 
 	void SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button);
 	void DisableButton(UButton* Button) const;
 	UInv_ItemDescription* GetItemDescription();
+	UInv_ItemDescription* GetEquippedItemDescription();
 	void SetItemDescrptionSizeAndPosition(UInv_ItemDescription* ItemDescription, UCanvasPanel* Canvas) const;
+	void SetEquippedItemDescrptionSizeAndPosition(UInv_ItemDescription* ItemDescription, UInv_ItemDescription* EquippedItemDescription, UCanvasPanel* Canvas) const;
 	bool CanEquipHoverItem(UInv_EquippedGridSlot* GridSlot, const FGameplayTag& EquipmentTypeTag) const;
 	UInv_EquippedGridSlot* FindSlotWithEquippedItem(UInv_InventoryItem* EquippedItem) const;
 	void ClearSlotOfItem(UInv_EquippedGridSlot* GridSlot) const;
