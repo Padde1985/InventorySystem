@@ -1,11 +1,13 @@
 ﻿#include "Widgets/ItemDescription/Inv_ItemDescription.h"
 #include "Components/SizeBox.h"
 
+// get the size for the description widget
 FVector2D UInv_ItemDescription::GetBoxSize() const
 {
 	return this->SizeBox->GetDesiredSize();
 }
 
+// set visibility for item description widget
 void UInv_ItemDescription::SetVisibility(ESlateVisibility InVisibility)
 {
 	for (UInv_CompositeBase* Child : GetChildren())

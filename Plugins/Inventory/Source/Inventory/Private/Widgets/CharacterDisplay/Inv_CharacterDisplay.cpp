@@ -1,9 +1,9 @@
 ﻿#include "Widgets/CharacterDisplay/Inv_CharacterDisplay.h"
-
 #include "Blueprint/WidgetLayoutLibrary.h"
 #include "EquipmentManagement/ProxyMesh/Inv_ProxyMesh.h"
 #include "Kismet/GameplayStatics.h"
 
+// callback for mouse button down (activate dragging)
 FReply UInv_CharacterDisplay::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	this->CurrentPosition = UWidgetLayoutLibrary::GetMousePositionOnViewport(GetOwningPlayer()); 
@@ -13,6 +13,7 @@ FReply UInv_CharacterDisplay::NativeOnMouseButtonDown(const FGeometry& InGeometr
 	return FReply::Handled();
 }
 
+// callback for mouse button release (stop dragging)
 FReply UInv_CharacterDisplay::NativeOnMouseButtonUp(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	this->bIsDragging = false;
@@ -20,6 +21,7 @@ FReply UInv_CharacterDisplay::NativeOnMouseButtonUp(const FGeometry& InGeometry,
 	return Super::NativeOnMouseButtonUp(InGeometry, InMouseEvent);
 }
 
+// callback for moving mouse off the character screen in inventory
 void UInv_CharacterDisplay::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
 	Super::NativeOnMouseLeave(InMouseEvent);
@@ -27,6 +29,7 @@ void UInv_CharacterDisplay::NativeOnMouseLeave(const FPointerEvent& InMouseEvent
 	this->bIsDragging = false;
 }
 
+// initiate proxy mesh
 void UInv_CharacterDisplay::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -41,6 +44,7 @@ void UInv_CharacterDisplay::NativeOnInitialized()
 	this->Mesh = ProxyMesh->GetMesh();
 }
 
+// rotate character display
 void UInv_CharacterDisplay::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);

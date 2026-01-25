@@ -1,6 +1,7 @@
 ﻿#include "Widgets/Composite/Inv_LeafLabeledValue.h"
 #include "Components/TextBlock.h"
 
+// set text description for value
 void UInv_LeafLabeledValue::SetTextLabel(const FText& Text, bool bCollapse) const
 {
 	if (bCollapse)
@@ -11,6 +12,7 @@ void UInv_LeafLabeledValue::SetTextLabel(const FText& Text, bool bCollapse) cons
 	this->TextLabel->SetText(Text);
 }
 
+// set value
 void UInv_LeafLabeledValue::SetTextValue(const FText& Text, bool bCollapse) const
 {
 	if (bCollapse)
@@ -21,6 +23,7 @@ void UInv_LeafLabeledValue::SetTextValue(const FText& Text, bool bCollapse) cons
 	this->TextValue->SetText(Text);
 }
 
+// initialize basic settings
 void UInv_LeafLabeledValue::NativePreConstruct()
 {
 	Super::NativePreConstruct();

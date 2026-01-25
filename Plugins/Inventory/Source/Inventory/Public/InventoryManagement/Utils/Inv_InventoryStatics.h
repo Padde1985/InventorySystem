@@ -28,6 +28,7 @@ public:
 	template <typename T, typename FuncT> static void ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 Columns, const FuncT& Func);
 };
 
+// return requested fragment if possible
 template <typename FragmentType>
 const FragmentType* UInv_InventoryStatics::GetFragment(UInv_InventoryItem* Item, const FGameplayTag& Tag)
 {
@@ -38,6 +39,7 @@ const FragmentType* UInv_InventoryStatics::GetFragment(UInv_InventoryItem* Item,
 	return Manifest.GetFragmentByTag<FragmentType>(Tag);
 }
 
+// walk through the inventory row by row and column by column and call a given function (usually a lambda)
 template <typename T, typename FuncT>
 void UInv_InventoryStatics::ForEach2D(TArray<T>& Array, int32 Index, const FIntPoint& Range2D, int32 Columns, const FuncT& Func)
 {

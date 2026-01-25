@@ -38,7 +38,7 @@ private:
 	UFUNCTION() void OnPossedPawnChange(APawn* OldPawn, APawn* NewPawn);
 	
 	void InitInventoryComponent();
-	AInv_EquipActor* SpawnEquippedActor(FInv_EquipmentFragment* EquipmentFragment, const FInv_ItemManifest& Manifest, USkeletalMeshComponent* AttachMesh);
+	AInv_EquipActor* SpawnEquippedActor(FInv_EquipmentFragment* EquipmentFragment, const FInv_ItemManifest& Manifest, USkeletalMeshComponent* AttachMesh) const;
 	AInv_EquipActor* FindEquippedActorByType(const FGameplayTag& Tag);
 	void RemoveEquippedActor(const FGameplayTag& Tag);
 	void InitPlayerController();

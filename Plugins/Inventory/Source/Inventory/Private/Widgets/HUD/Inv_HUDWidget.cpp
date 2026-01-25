@@ -3,6 +3,7 @@
 #include "InventoryManagement/Utils/Inv_InventoryStatics.h"
 #include "Widgets/HUD/Inv_InfoMessage.h"
 
+// initialize HUD widget
 void UInv_HUDWidget::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -14,6 +15,7 @@ void UInv_HUDWidget::NativeOnInitialized()
 	}
 }
 
+// show info message on screen
 void UInv_HUDWidget::OnNoRoom()
 {
 	if (!IsValid(this->InfoMessage)) return;

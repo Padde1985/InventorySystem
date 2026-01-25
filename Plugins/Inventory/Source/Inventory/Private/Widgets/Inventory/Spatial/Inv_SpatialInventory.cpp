@@ -15,6 +15,7 @@
 #include "Widgets/Inventory/HoverItem/Inv_HoverItem.h"
 #include "Widgets/Inventory/SlottedItems/Inv_EquippedSlottedItem.h"
 
+// initialize the spatial inventory (the one that contains the sub grids)
 void UInv_SpatialInventory::NativeOnInitialized()
 {
 	Super::OnInitialized();
@@ -39,6 +40,7 @@ void UInv_SpatialInventory::NativeOnInitialized()
 	});
 }
 
+// checking room for item based of the type of requesting item component
 FInv_SlotAvailabilityResult UInv_SpatialInventory::HasRoomForItem(UInv_ItemComponent* Component) const
 {
 	switch (UInv_InventoryStatics::GetItemCategoryByItemComponent(Component))
@@ -55,6 +57,7 @@ FInv_SlotAvailabilityResult UInv_SpatialInventory::HasRoomForItem(UInv_ItemCompo
 	}
 }
 
+// defer item dropping to the active grid
 FReply UInv_SpatialInventory::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	this->ActiveGrid->DropItem();
@@ -62,6 +65,7 @@ FReply UInv_SpatialInventory::NativeOnMouseButtonDown(const FGeometry& InGeometr
 	return FReply::Handled();
 }
 
+// show item description popup
 void UInv_SpatialInventory::OnItemHovered(UInv_InventoryItem* Item)
 {
 	const FInv_ItemManifest& Manifest = Item->GetItemManifest();
@@ -84,6 +88,7 @@ void UInv_SpatialInventory::OnItemHovered(UInv_InventoryItem* Item)
 	GetOwningPlayer()->GetWorldTimerManager().SetTimer(this->DescriptionTimerHandle, TimerDelegate, this->DescriptionTimerDelay, false);
 }
 
+// remove item description popup
 void UInv_SpatialInventory::OnItemUnhovered()
 {
 	this->GetItemDescription()->SetVisibility(ESlateVisibility::Collapsed);
@@ -93,6 +98,7 @@ void UInv_SpatialInventory::OnItemUnhovered()
 	GetOwningPlayer()->GetWorldTimerManager().ClearTimer(this->EquippedDescriptionTimerHandle);
 }
 
+// defer the check of hover item to the active grid
 bool UInv_SpatialInventory::HasHoverItem() const
 {
 	if (this->Grid_Equippables->HasHoverItem()) return true;
@@ -102,6 +108,7 @@ bool UInv_SpatialInventory::HasHoverItem() const
 	return false;
 }
 
+// update position of description popups when moving mouse
 void UInv_SpatialInventory::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
@@ -112,6 +119,7 @@ void UInv_SpatialInventory::NativeTick(const FGeometry& MyGeometry, float InDelt
 	this->SetEquippedItemDescrptionSizeAndPosition(this->ItemDescriptionWidget, this->EquippedItemDescriptionWidget, this->CanvasPanel);
 }
 
+// get the hover item from the active grid
 UInv_HoverItem* UInv_SpatialInventory::GetHoverItem() const
 {
 	if (!this->ActiveGrid.IsValid()) return nullptr;
@@ -119,26 +127,31 @@ UInv_HoverItem* UInv_SpatialInventory::GetHoverItem() const
 	return this->ActiveGrid->GetHoverItem();
 }
 
+// get the tilesize of the active grid
 float UInv_SpatialInventory::GetTileSize() const
 {
 	return this->Grid_Equippables->GetTileSize();
 }
 
+// show equippables grid
 void UInv_SpatialInventory::ShowEquippables()
 {
 	this->SetActiveGrid(this->Grid_Equippables, this->Button_Equippables);
 }
 
+// show consumables grid
 void UInv_SpatialInventory::ShowConsumables()
 {
 	this->SetActiveGrid(this->Grid_Consumables, this->Button_Consumables);
 }
 
+// show craftables grid
 void UInv_SpatialInventory::ShowCraftables()
 {
 	this->SetActiveGrid(this->Grid_Craftables, this->Button_Craftables);
 }
 
+// handle clicking on empty equipping slot
 void UInv_SpatialInventory::EquippedSlotClicked(UInv_EquippedGridSlot* GridSlot, const FGameplayTag& EquipmentTypeTag)
 {
 	if (!this->CanEquipHoverItem(GridSlot, EquipmentTypeTag)) return;
@@ -156,6 +169,7 @@ void UInv_SpatialInventory::EquippedSlotClicked(UInv_EquippedGridSlot* GridSlot,
 	this->Grid_Equippables->ClearHoverItem();
 }
 
+// handle clicking on an already equipped slot
 void UInv_SpatialInventory::EquippedSlottedItemClicked(UInv_EquippedSlottedItem* SlottedItem)
 {
 	UInv_InventoryStatics::ItemUnhovered(GetOwningPlayer());
@@ -174,6 +188,7 @@ void UInv_SpatialInventory::EquippedSlottedItemClicked(UInv_EquippedSlottedItem*
 	this->BroadcastSlotClickedDelegates(ItemToEquip, ItemToUnequip);
 }
 
+// show item description for equipped item
 void UInv_SpatialInventory::ShowEquippedItemDescription(UInv_InventoryItem* Item)
 {
 	const FInv_ItemManifest& Manifest = Item->GetItemManifest();
@@ -207,6 +222,7 @@ void UInv_SpatialInventory::ShowEquippedItemDescription(UInv_InventoryItem* Item
 	EquippedItemManifest.AssimilateInventoryFragments(EquippedDescriptionWidget);
 }
 
+// set the active grid
 void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* Button)
 {
 	if (this->ActiveGrid.IsValid())
@@ -221,6 +237,7 @@ void UInv_SpatialInventory::SetActiveGrid(UInv_InventoryGrid* Grid, UButton* But
 	this->Switcher->SetActiveWidget(Grid);
 }
 
+// disable button of active grid
 void UInv_SpatialInventory::DisableButton(UButton* Button) const
 {
 	this->Button_Equippables->SetIsEnabled(true);
@@ -229,6 +246,7 @@ void UInv_SpatialInventory::DisableButton(UButton* Button) const
 	Button->SetIsEnabled(false);
 }
 
+// get item descripton widget
 UInv_ItemDescription* UInv_SpatialInventory::GetItemDescription()
 {
 	if (!IsValid(this->ItemDescriptionWidget))
@@ -240,6 +258,7 @@ UInv_ItemDescription* UInv_SpatialInventory::GetItemDescription()
 	return this->ItemDescriptionWidget;
 }
 
+// get equipped item description widget
 UInv_ItemDescription* UInv_SpatialInventory::GetEquippedItemDescription()
 {
 	if (!IsValid(this->EquippedItemDescriptionWidget))
@@ -251,6 +270,7 @@ UInv_ItemDescription* UInv_SpatialInventory::GetEquippedItemDescription()
 	return this->EquippedItemDescriptionWidget;
 }
 
+// place popup on screen
 void UInv_SpatialInventory::SetItemDescrptionSizeAndPosition(UInv_ItemDescription* ItemDescription, UCanvasPanel* Canvas) const
 {
 	UCanvasPanelSlot* DescriptionSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(ItemDescription);
@@ -263,6 +283,7 @@ void UInv_SpatialInventory::SetItemDescrptionSizeAndPosition(UInv_ItemDescriptio
 	DescriptionSlot->SetPosition(ClampedPos);
 }
 
+// place popup on screen
 void UInv_SpatialInventory::SetEquippedItemDescrptionSizeAndPosition(UInv_ItemDescription* ItemDescription, UInv_ItemDescription* EquippedItemDescription, UCanvasPanel* Canvas) const
 {
 	UCanvasPanelSlot* DescriptionSlot = UWidgetLayoutLibrary::SlotAsCanvasSlot(ItemDescription);
@@ -278,6 +299,7 @@ void UInv_SpatialInventory::SetEquippedItemDescrptionSizeAndPosition(UInv_ItemDe
 	EquippedDescriptionSlot->SetSize(EquippedSize);
 }
 
+// check if the current hovered item can be equipped
 bool UInv_SpatialInventory::CanEquipHoverItem(UInv_EquippedGridSlot* GridSlot, const FGameplayTag& EquipmentTypeTag) const
 {
 	if (!IsValid(GridSlot) || GridSlot->GetInventoryItem().IsValid()) return false;
@@ -292,6 +314,7 @@ bool UInv_SpatialInventory::CanEquipHoverItem(UInv_EquippedGridSlot* GridSlot, c
 		   && HeldItem->GetItemManifest().GetItemType().MatchesTag(EquipmentTypeTag);
 }
 
+// find the equipped slot for given item
 UInv_EquippedGridSlot* UInv_SpatialInventory::FindSlotWithEquippedItem(UInv_InventoryItem* EquippedItem) const
 {
 	const TObjectPtr<UInv_EquippedGridSlot>* FoundEquippedGridSlot = this->EquippedGridSlots.FindByPredicate([EquippedItem](const UInv_EquippedGridSlot* GridSlot)
@@ -301,6 +324,7 @@ UInv_EquippedGridSlot* UInv_SpatialInventory::FindSlotWithEquippedItem(UInv_Inve
 	return FoundEquippedGridSlot ? *FoundEquippedGridSlot : nullptr;
 }
 
+// empty equipped slot
 void UInv_SpatialInventory::ClearSlotOfItem(UInv_EquippedGridSlot* GridSlot) const
 {
 	if (IsValid(GridSlot))
@@ -310,6 +334,7 @@ void UInv_SpatialInventory::ClearSlotOfItem(UInv_EquippedGridSlot* GridSlot) con
 	}
 }
 
+// remove item from equipped grid slot
 void UInv_SpatialInventory::RemoveEquippedSlottedItem(UInv_EquippedSlottedItem* Item)
 {
 	if (!IsValid(Item)) return;
@@ -321,6 +346,7 @@ void UInv_SpatialInventory::RemoveEquippedSlottedItem(UInv_EquippedSlottedItem* 
 	Item->RemoveFromParent();
 }
 
+// equip an item
 void UInv_SpatialInventory::MakeEquippedSlottedItem(UInv_EquippedSlottedItem* Item, UInv_EquippedGridSlot* GridSlot, UInv_InventoryItem* ItemToEquip)
 {
 	if (!IsValid(GridSlot)) return;
@@ -330,6 +356,7 @@ void UInv_SpatialInventory::MakeEquippedSlottedItem(UInv_EquippedSlottedItem* It
 	GridSlot->SetEquippedSlottedItem(SlottedItem);
 }
 
+// ask server to broadcast the item switch, multiplayer only
 void UInv_SpatialInventory::BroadcastSlotClickedDelegates(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip) const
 {
 	UInv_InventoryComponent* IC = UInv_InventoryStatics::GetInventoryComponent(GetOwningPlayer());

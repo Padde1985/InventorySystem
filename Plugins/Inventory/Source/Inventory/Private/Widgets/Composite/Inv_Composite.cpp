@@ -1,6 +1,7 @@
 ﻿#include "Widgets/Composite/Inv_Composite.h"
 #include "Blueprint/WidgetTree.h"
 
+// initialize all composites (widget elements in the item description)
 void UInv_Composite::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
@@ -15,6 +16,7 @@ void UInv_Composite::NativeOnInitialized()
 	});
 }
 
+// apply function gets called from item description widget
 void UInv_Composite::ApplyFunction(FuncType Func)
 {
 	for (TObjectPtr<UInv_CompositeBase>& Child : this->Children)
@@ -23,6 +25,7 @@ void UInv_Composite::ApplyFunction(FuncType Func)
 	}
 }
 
+// collapse all elements
 void UInv_Composite::Collapse()
 {
 	for (TObjectPtr<UInv_CompositeBase>& Child : this->Children)
@@ -31,6 +34,7 @@ void UInv_Composite::Collapse()
 	}
 }
 
+// getter for all children elements
 TArray<UInv_CompositeBase*> UInv_Composite::GetChildren() const
 {
 	return this->Children;

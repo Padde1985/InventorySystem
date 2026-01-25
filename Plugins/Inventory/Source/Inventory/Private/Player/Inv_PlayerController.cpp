@@ -7,6 +7,7 @@
 #include "Interaction/Inv_HighlightableInterface.h"
 #include "InventoryManagement/Components/Inv_InventoryComponent.h"
 
+// create player controller
 AInv_PlayerController::AInv_PlayerController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -14,6 +15,7 @@ AInv_PlayerController::AInv_PlayerController()
 	this->ItemTraceChannel = ECollisionChannel::ECC_GameTraceChannel1;
 }
 
+// activate trace for each tick
 void AInv_PlayerController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -21,6 +23,7 @@ void AInv_PlayerController::Tick(float DeltaTime)
 	this->TraceForItem();
 }
 
+// callback for opening and closing inventory menu
 void AInv_PlayerController::ToggleInventory()
 {
 	if (!this->InventoryComponent.IsValid()) return;
@@ -36,6 +39,7 @@ void AInv_PlayerController::ToggleInventory()
 	}
 }
 
+// create the HUD and assign inventory component
 void AInv_PlayerController::BeginPlay()
 {
 	Super::BeginPlay();
@@ -45,6 +49,7 @@ void AInv_PlayerController::BeginPlay()
 	this->CreateHUDWidget();
 }
 
+// setup action inputs (opening and closing inventory, picking up items, ...)
 void AInv_PlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
@@ -62,6 +67,7 @@ void AInv_PlayerController::SetupInputComponent()
 	EnhancedInputComponent->BindAction(this->ToggleInventoryAction, ETriggerEvent::Started, this, &AInv_PlayerController::ToggleInventory);
 }
 
+// primary interaction (picking up items)
 void AInv_PlayerController::PrimaryInteract()
 {
 	if (!this->ThisActor.IsValid()) return;
@@ -72,6 +78,7 @@ void AInv_PlayerController::PrimaryInteract()
 	this->InventoryComponent->TryAddItem(ItemComp);
 }
 
+// create the HUD widget
 void AInv_PlayerController::CreateHUDWidget()
 {
 	if (!IsLocalController()) return;
@@ -80,6 +87,7 @@ void AInv_PlayerController::CreateHUDWidget()
 	if (IsValid(this->HUDWidget)) this->HUDWidget->AddToViewport();
 }
 
+// trace for an item to be highlighted or showing pickup message
 void AInv_PlayerController::TraceForItem()
 {
 	if (!IsValid(GEngine) || !IsValid(GEngine->GameViewport)) return;

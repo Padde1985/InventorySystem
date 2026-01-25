@@ -15,6 +15,7 @@ UInv_InventoryComponent::UInv_InventoryComponent() : InventoryList(this)
 	this->bInventoryMenuOpen = false;
 }
 
+// try to add item to inventory (check for stackable and room available)
 void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 {
 	FInv_SlotAvailabilityResult SlotAvailabilityResult = this->InventoryMenu->HasRoomForItem(ItemComponent);
@@ -40,6 +41,7 @@ void UInv_InventoryComponent::TryAddItem(UInv_ItemComponent* ItemComponent)
 	}
 }
 
+// server rpc for adding new item
 void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder)
 {
 	UInv_InventoryItem* NewItem = this->InventoryList.AddEntry(ItemComponent);
@@ -60,6 +62,7 @@ void UInv_InventoryComponent::Server_AddNewItem_Implementation(UInv_ItemComponen
 	}
 }
 
+// server rpc for adding stacks to an already existing item
 void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemComponent* ItemComponent, int32 StackCount, int32 Remainder)
 {
 	const FGameplayTag& ItemType = IsValid(ItemComponent) ? ItemComponent->GetItemManifest().GetItemType() : FGameplayTag::EmptyTag;
@@ -78,6 +81,7 @@ void UInv_InventoryComponent::Server_AddStacksToItem_Implementation(UInv_ItemCom
 	}
 }
 
+// server rpc for dropping an item (stackcount already full and inventory has no room left)
 void UInv_InventoryComponent::Server_DropItem_Implementation(UInv_InventoryItem* Item, int32 StackCount)
 {
 	const int32 NewStackCount = Item->GetStackCount() - StackCount;
@@ -93,6 +97,7 @@ void UInv_InventoryComponent::Server_DropItem_Implementation(UInv_InventoryItem*
 	this->SpawnDroppedItem(Item, StackCount);
 }
 
+// server rpc for cunsuming an item
 void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryItem* Item)
 {
 	const int32 NewStackCount = Item->GetStackCount() - 1;
@@ -111,17 +116,20 @@ void UInv_InventoryComponent::Server_ConsumeItem_Implementation(UInv_InventoryIt
 	}
 }
 
+// server rpc when clicking on an equipped item
 void UInv_InventoryComponent::Server_EquippedSlotClicked_Implementation(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip)
 {
 	this->Multicast_EquippedSlotClicked(ItemToEquip, ItemToUnequip);
 }
 
+// client rpc when switching equipped items
 void UInv_InventoryComponent::Multicast_EquippedSlotClicked_Implementation(UInv_InventoryItem* ItemToEquip, UInv_InventoryItem* ItemToUnequip)
 {
 	this->OnItemEquipped.Broadcast(ItemToEquip);
 	this->OnItemUnequipped.Broadcast(ItemToUnequip);
 }
 
+// callback to open or close inventory menu
 void UInv_InventoryComponent::ToggleInventoryMenu()
 {
 	if (this->bInventoryMenuOpen)
@@ -135,11 +143,13 @@ void UInv_InventoryComponent::ToggleInventoryMenu()
 	this->OnInventoryMenuToggle.Broadcast(this->bInventoryMenuOpen);
 }
 
+// replication for mulitplayer
 void UInv_InventoryComponent::AddRepSubObj(UObject* SubObj)
 {
 	if (IsUsingRegisteredSubObjectList() && IsReadyForReplication() && IsValid(SubObj))	AddReplicatedSubObject(SubObj);
 }
 
+// spawn the dropped item in the world
 void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 StackCount) const
 {
 	const APawn* OwningPawn = this->OwningController->GetPawn();
@@ -157,11 +167,13 @@ void UInv_InventoryComponent::SpawnDroppedItem(UInv_InventoryItem* Item, int32 S
 	ItemManifest.SpawnPickupActor(this, SpawnLocation, Rotation);
 }
 
+// getter for inventory menu
 UInv_InventoryBase* UInv_InventoryComponent::GetInventoryMenu() const
 {
 	return this->InventoryMenu;
 }
 
+// check if menu is already open
 bool UInv_InventoryComponent::IsMenuOpen() const
 {
 	return this->bInventoryMenuOpen;
@@ -175,6 +187,7 @@ void UInv_InventoryComponent::BeginPlay()
 	this->ConstructInventory();
 }
 
+// replication for inventory lsit, only needed for multiplayer
 void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -182,6 +195,7 @@ void UInv_InventoryComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, InventoryList);
 }
 
+// construct the inventory menu and add it to viewport
 void UInv_InventoryComponent::ConstructInventory()
 {
 	this->OwningController = Cast<APlayerController>(GetOwner());
@@ -193,6 +207,8 @@ void UInv_InventoryComponent::ConstructInventory()
 	this->CloseInventoryMenu();
 }
 
+
+// open the inventory menu
 void UInv_InventoryComponent::OpenInventoryMenu()
 {
 	if (!IsValid(this->InventoryMenu)) return;
@@ -206,6 +222,7 @@ void UInv_InventoryComponent::OpenInventoryMenu()
 	this->OwningController->SetShowMouseCursor(true);
 }
 
+// close the menu
 void UInv_InventoryComponent::CloseInventoryMenu()
 {
 	if (!IsValid(this->InventoryMenu)) return;
@@ -218,5 +235,3 @@ void UInv_InventoryComponent::CloseInventoryMenu()
 	this->OwningController->SetInputMode(InputMode);
 	this->OwningController->SetShowMouseCursor(false);
 }
-
-

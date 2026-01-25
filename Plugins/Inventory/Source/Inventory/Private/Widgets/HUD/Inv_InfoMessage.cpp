@@ -1,6 +1,7 @@
 ﻿#include "Widgets/HUD/Inv_InfoMessage.h"
 #include "Components/TextBlock.h"
 
+// set message to be displayed in info message box
 void UInv_InfoMessage::SetMessage(const FText& Message)
 {
 	this->TextMessage->SetText(Message);
@@ -18,6 +19,7 @@ void UInv_InfoMessage::SetMessage(const FText& Message)
 	}, this->MessageLifeTime, false);
 }
 
+// initialize info message box
 void UInv_InfoMessage::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();

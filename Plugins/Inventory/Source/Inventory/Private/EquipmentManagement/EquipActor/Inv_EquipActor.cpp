@@ -8,11 +8,13 @@ AInv_EquipActor::AInv_EquipActor()
 	bReplicates = true;
 }
 
+// getter for equipment type
 FGameplayTag AInv_EquipActor::GetEquipmentType() const
 {
 	return this->EquipmentType;
 }
 
+// setter for equipment type
 void AInv_EquipActor::SetEquipmentType(FGameplayTag Type)
 {
 	this->EquipmentType = Type;

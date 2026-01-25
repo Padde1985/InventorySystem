@@ -18,6 +18,7 @@ AInv_ProxyMesh::AInv_ProxyMesh()
 	this->EquipmentComponent->SetIsProxy(true);
 }
 
+// getter for the mesh of the proxy character
 USkeletalMeshComponent* AInv_ProxyMesh::GetMesh() const
 {
 	return this->Mesh;
@@ -31,6 +32,7 @@ void AInv_ProxyMesh::BeginPlay()
 	this->DelayedInitializeOwner();
 }
 
+// initialize owner (maybe delayed as engine initializes objects not always in the correct order)
 void AInv_ProxyMesh::DelayedInitializeOwner()
 {
 	UWorld* World = GetWorld();
@@ -68,6 +70,7 @@ void AInv_ProxyMesh::DelayedInitializeOwner()
 	this->EquipmentComponent->InitializeOwner(PC);
 }
 
+// delayed initialization (gets called each tick until all requirements are met)
 void AInv_ProxyMesh::DelayedInitialization()
 {
 	FTimerDelegate TimerDelegate;

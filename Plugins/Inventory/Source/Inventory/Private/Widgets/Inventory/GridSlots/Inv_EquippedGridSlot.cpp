@@ -9,6 +9,7 @@
 #include "Widgets/Inventory/HoverItem/Inv_HoverItem.h"
 #include "Widgets/Inventory/SlottedItems/Inv_EquippedSlottedItem.h"
 
+// callback for hovering an equipped item
 void UInv_EquippedGridSlot::NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	if (!GetAvailable()) return;
@@ -23,6 +24,7 @@ void UInv_EquippedGridSlot::NativeOnMouseEnter(const FGeometry& InGeometry, cons
 	}
 }
 
+// callback for unhovering an equipped item
 void UInv_EquippedGridSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 {
 	if (!GetAvailable()) return;
@@ -38,6 +40,7 @@ void UInv_EquippedGridSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent
 	}
 }
 
+// callback for clicking on an equipped item
 FReply UInv_EquippedGridSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	this->EquippedSlotClicked.Broadcast(this, this->EquipmentTypeTag);
@@ -45,6 +48,7 @@ FReply UInv_EquippedGridSlot::NativeOnMouseButtonDown(const FGeometry& InGeometr
 	return FReply::Handled();
 }
 
+// callback for equipping an item
 UInv_EquippedSlottedItem* UInv_EquippedGridSlot::OnItemEquipped(UInv_InventoryItem* Item, const FGameplayTag& EquipmentTag, const float TileSize)
 {
 	if (!EquipmentTag.MatchesTagExact(this->EquipmentTypeTag)) return nullptr;
@@ -83,6 +87,7 @@ UInv_EquippedSlottedItem* UInv_EquippedGridSlot::OnItemEquipped(UInv_InventoryIt
 	return this->EquippedSlottedItem;
 }
 
+// setter for equipped item
 void UInv_EquippedGridSlot::SetEquippedSlottedItem(UInv_EquippedSlottedItem* Item)
 {
 	this->EquippedSlottedItem = Item;

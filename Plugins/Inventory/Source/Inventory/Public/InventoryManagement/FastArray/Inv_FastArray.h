@@ -35,7 +35,7 @@ struct FInv_InventoryFastArray : public FFastArraySerializer
 	void PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize);
 	void PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize);
 	bool NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParams);
-	UInv_InventoryItem* AddEntry(UInv_ItemComponent* ItemComponent);
+	UInv_InventoryItem* AddEntry(const UInv_ItemComponent* ItemComponent);
 	UInv_InventoryItem* AddEntry(UInv_InventoryItem* Item);
 	void RemoveEntry(UInv_InventoryItem* Item);
 	UInv_InventoryItem* FindFirstItemByType(const FGameplayTag& ItemType);

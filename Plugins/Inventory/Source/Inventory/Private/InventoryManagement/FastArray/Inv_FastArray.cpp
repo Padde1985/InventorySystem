@@ -3,6 +3,13 @@
 #include "Items/Inv_InventoryItem.h"
 #include "Items/Components/Inv_ItemComponent.h"
 
+/*
+ * the whole fast array is only needed for multiplayer as is provides functionality for broadcasting from server to client and vice versa
+ * Pre replicate, post replicate, etc.
+ * For single player a map or TArray would suffice
+ */
+
+// get all inventory items 
 TArray<UInv_InventoryItem*> FInv_InventoryFastArray::GetInventoryItems() const
 {
 	TArray<UInv_InventoryItem*> Results;
@@ -15,6 +22,7 @@ TArray<UInv_InventoryItem*> FInv_InventoryFastArray::GetInventoryItems() const
 	return Results;
 }
 
+// broadcast removed items
 void FInv_InventoryFastArray::PreReplicatedRemove(const TArrayView<int32> RemovedIndices, int32 FinalSize)
 {
 	UInv_InventoryComponent* IC = Cast<UInv_InventoryComponent>(this->OwnerComponent);
@@ -26,6 +34,7 @@ void FInv_InventoryFastArray::PreReplicatedRemove(const TArrayView<int32> Remove
 	}
 }
 
+// broadcast added items
 void FInv_InventoryFastArray::PostReplicatedAdd(const TArrayView<int32> AddedIndices, int32 FinalSize)
 {
 	UInv_InventoryComponent* IC = Cast<UInv_InventoryComponent>(this->OwnerComponent);
@@ -37,12 +46,14 @@ void FInv_InventoryFastArray::PostReplicatedAdd(const TArrayView<int32> AddedInd
 	}
 }
 
+// serializer function
 bool FInv_InventoryFastArray::NetDeltaSerialize(FNetDeltaSerializeInfo& DeltaParams)
 {
 	return FastArrayDeltaSerialize<FInv_InventoryEntry, FInv_InventoryFastArray>(this->Entries, DeltaParams, *this);
 }
 
-UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemComponent)
+// add new item to inventory via item component
+UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(const UInv_ItemComponent* ItemComponent)
 {
 	check(this->OwnerComponent);
 	AActor* OwningActor = this->OwnerComponent->GetOwner();
@@ -59,6 +70,7 @@ UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_ItemComponent* ItemCo
 	return Entry.Item;
 }
 
+// add new item to inventory
 UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_InventoryItem* Item)
 {
 	check(this->OwnerComponent);
@@ -72,6 +84,7 @@ UInv_InventoryItem* FInv_InventoryFastArray::AddEntry(UInv_InventoryItem* Item)
 	return Item;
 }
 
+// remove entry from inventory
 void FInv_InventoryFastArray::RemoveEntry(UInv_InventoryItem* Item)
 {
 	for (TIndexedContainerIterator EntryIt = this->Entries.CreateIterator(); EntryIt; ++EntryIt)
@@ -86,6 +99,7 @@ void FInv_InventoryFastArray::RemoveEntry(UInv_InventoryItem* Item)
 	}
 }
 
+// check if item already exists in array and return the item
 UInv_InventoryItem* FInv_InventoryFastArray::FindFirstItemByType(const FGameplayTag& ItemType)
 {
 	FInv_InventoryEntry* FoundItem = this->Entries.FindByPredicate([ItemType](const FInv_InventoryEntry& Entry)
